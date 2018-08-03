@@ -56,9 +56,6 @@ gems:
 paginate: 6
 paginate_path: "/blog/page:num/"
 
-plugins:
-  -jekyll-seo-tag
-
 jekyll-mentions:
     base_url:
 
