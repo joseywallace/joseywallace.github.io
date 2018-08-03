@@ -50,7 +50,7 @@ plt.show()
 {% endhighlight %}
 
  
-![png]({{ BASE_PATH }}/images/bayesian-linear-regression_3_0.png) 
+![png]({{ BASE_PATH }}/images/output_3_0.png) 
 
  
 ### Create the pymc3 model 
@@ -102,7 +102,7 @@ plt.show()
 {% endhighlight %}
 
  
-![png]({{ BASE_PATH }}/images/bayesian-linear-regression_9_0.png) 
+![png]({{ BASE_PATH }}/images/output_9_0.png) 
 
 
 **In [7]:**
@@ -219,7 +219,7 @@ r2_score(y_test,*pred)
 {% endhighlight %}
 
  
-![png]({{ BASE_PATH }}/images/bayesian-linear-regression_14_0.png) 
+![png]({{ BASE_PATH }}/images/output_14_0.png) 
 
 
 
