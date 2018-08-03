@@ -50,7 +50,7 @@ plt.show()
 {% endhighlight %}
 
  
-![png](/images/output_3_0.png) 
+![png]({{"/images/output_3_0.png"}}) 
 
  
 ### Create the pymc3 model 
