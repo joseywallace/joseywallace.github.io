@@ -1,10 +1,10 @@
 ---
 layout: post
 title: Multivariable linear regression
-tags:
-    - python
-    - notebook
+date:   2018-08-02
+excerpt: "An short easy introduction to PyMC3"
 --- 
+
 ## Multivariable linear regression
 ### Create the data 
 
