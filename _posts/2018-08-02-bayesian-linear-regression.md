@@ -1,6 +1,6 @@
 ---
 layout: post
-title: bayesian-linear-regression
+title: Multivariable linear regression
 tags:
     - python
     - notebook
