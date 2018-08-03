@@ -3,6 +3,7 @@ layout: post
 title: Multivariable linear regression
 date:   2018-08-02
 excerpt: "An short easy introduction to PyMC3"
+image: "/images/pic02.jpg"
 --- 
 
 ## Multivariable linear regression
