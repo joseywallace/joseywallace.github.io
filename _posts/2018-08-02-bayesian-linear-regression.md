@@ -49,9 +49,7 @@ plt.legend()
 plt.show()
 {% endhighlight %}
 
- 
-![png]({{"/images/output_3_0.png"}}) 
-
+<span class="image left"><img src="{{ "/images/output_3_0.png" | absolute_url }}" alt="" /></span>
  
 ### Create the pymc3 model 
 
