@@ -99,8 +99,7 @@ plt.show()
 {% endhighlight %}
 
  
-![png]({{ BASE_PATH }}/images/output_9_0.png) 
-
+<span class="image fit"><img src="{{ "/images/output_9_0.png" | absolute_url }}" alt="" /></span>
 
 **In [7]:**
 
@@ -216,8 +215,7 @@ r2_score(y_test,*pred)
 {% endhighlight %}
 
  
-![png]({{ BASE_PATH }}/images/output_14_0.png) 
-
+<span class="image fit"><img src="{{ "/images/output_14_0.png" | absolute_url }}" alt="" /></span>
 
 
 
