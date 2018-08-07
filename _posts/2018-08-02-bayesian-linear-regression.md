@@ -49,9 +49,11 @@ plt.legend()
 plt.show()
 {% endhighlight %}
 
+<style>
 img {
     max-width: 100%;
 }
+</style>
 
 <span class="image fit"><img src="{{ "/images/output_3_0.png" | absolute_url }}" alt="" /></span>
 ### Create the pymc3 model 
