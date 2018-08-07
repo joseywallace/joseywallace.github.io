@@ -49,7 +49,7 @@ plt.legend()
 plt.show()
 {% endhighlight %}
 
-<span class="image fit"><img src="{{ "/images/output_3_0.png" | absolute_url }}" alt="" /></span>
+<span class="image fit"><img src="{{ "/images/output_3_0.png" | absolute_url }}" media="(max-width: 400px)" alt="" /></span>
 ### Create the pymc3 model 
 
 **In [4]:**
