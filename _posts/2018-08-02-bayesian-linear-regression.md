@@ -53,9 +53,9 @@ plt.show()
 img {
     max-width: 100%;
 }
+<span class="image fit"><img src="{{ "/images/output_3_0.png" | absolute_url }}" alt="" /></span>
 </style>
 
-<span class="image fit"><img src="{{ "/images/output_3_0.png" | absolute_url }}" alt="" /></span>
 ### Create the pymc3 model 
 
 **In [4]:**
