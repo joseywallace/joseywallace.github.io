@@ -2446,7 +2446,7 @@
 		.image.fit {
 			display: block;
 			margin: 2.5rem 0;
-			width: 100%;
+			width: 80%;
 		}
 
 			.image.fit:first-child {
@@ -2454,7 +2454,7 @@
 			}
 
 			.image.fit img {
-				width: 100%;
+				width: 80%;
 			}
 
 		.image.main {
