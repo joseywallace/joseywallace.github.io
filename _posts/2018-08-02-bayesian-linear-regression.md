@@ -50,11 +50,7 @@ plt.show()
 {% endhighlight %}
 
 <span class="image fit">
-	img {
-    		max-width: 100%;
-    		height: auto;
-	}
-	<img src="{{ "/images/output_3_0.png" | absolute_url }}" alt="" />
+	<img src="{{ "/images/output_3_0.png" | absolute_url }}" alt="" width="200px"/>
 </span>
 
 ### Create the pymc3 model 
