@@ -110,123 +110,6 @@ pm.summary(nuts_trace[1000:])
 
 
 
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>mean</th>
-      <th>sd</th>
-      <th>mc_error</th>
-      <th>hpd_2.5</th>
-      <th>hpd_97.5</th>
-      <th>n_eff</th>
-      <th>Rhat</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>alpha__0</th>
-      <td>0.480106</td>
-      <td>0.037595</td>
-      <td>0.000774</td>
-      <td>0.405709</td>
-      <td>0.550487</td>
-      <td>2975.210769</td>
-      <td>1.001104</td>
-    </tr>
-    <tr>
-      <th>betas__0_0</th>
-      <td>1.557257</td>
-      <td>0.036890</td>
-      <td>0.000658</td>
-      <td>1.487401</td>
-      <td>1.628156</td>
-      <td>3147.314093</td>
-      <td>0.999515</td>
-    </tr>
-    <tr>
-      <th>betas__0_1</th>
-      <td>-1.562830</td>
-      <td>0.038143</td>
-      <td>0.000744</td>
-      <td>-1.634971</td>
-      <td>-1.484338</td>
-      <td>2849.492200</td>
-      <td>0.999755</td>
-    </tr>
-    <tr>
-      <th>s</th>
-      <td>0.986880</td>
-      <td>0.027428</td>
-      <td>0.000468</td>
-      <td>0.930528</td>
-      <td>1.038020</td>
-      <td>3049.781251</td>
-      <td>0.999667</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
- 
-### Test the trained model on the test data 
-
-**In [8]:**
-
-{% highlight python %}
-# set the shared values to the test data
-model_input.set_value(X_test)
-model_output.set_value(y_test)
-
-#create a posterior predictive check (ppc) to sample the space of test x values
-ppc = pm.sample_ppc(
-        nuts_trace[1000:], # specify the trace and exclude the first 1000 samples 
-        model=lin_reg_model, # specify the trained model
-        samples=1000) #for each point in X_test, create 1000 samples
-{% endhighlight %}
-
-    100%|████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:00<00:00, 1683.52it/s]
-    
- 
-### Plot the y_test vs y_predict and calculate r**2 
-
-**In [9]:**
-
-{% highlight python %}
-pred = ppc['y'].mean(axis=0)  # take the mean value of the 1000 samples at each X_test value 
-plt.scatter(y_test, pred)
-plt.show()
-r2_score(y_test,*pred)
-{% endhighlight %}
-
- 
-<span class="image fit"><img src="{{ "/images/output_14_0.png" | absolute_url }}" alt="" /></span>
-
-
-
-
-    0.835496545799272
-
-
-<!-- Table -->
-<h2>Table</h2>
-
-<h3>Default</h3>
 <div class="table-wrapper">
 	<table border="1" class="dataframe">
   <thead>
@@ -285,3 +168,42 @@ r2_score(y_test,*pred)
   </tbody>
 </table>
 </div>
+
+ 
+### Test the trained model on the test data 
+
+**In [8]:**
+
+{% highlight python %}
+# set the shared values to the test data
+model_input.set_value(X_test)
+model_output.set_value(y_test)
+
+#create a posterior predictive check (ppc) to sample the space of test x values
+ppc = pm.sample_ppc(
+        nuts_trace[1000:], # specify the trace and exclude the first 1000 samples 
+        model=lin_reg_model, # specify the trained model
+        samples=1000) #for each point in X_test, create 1000 samples
+{% endhighlight %}
+
+    100%|████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:00<00:00, 1683.52it/s]
+    
+ 
+### Plot the y_test vs y_predict and calculate r**2 
+
+**In [9]:**
+
+{% highlight python %}
+pred = ppc['y'].mean(axis=0)  # take the mean value of the 1000 samples at each X_test value 
+plt.scatter(y_test, pred)
+plt.show()
+r2_score(y_test,*pred)
+{% endhighlight %}
+
+ 
+<span class="image fit"><img src="{{ "/images/output_14_0.png" | absolute_url }}" alt="" /></span>
+
+
+
+
+    0.835496545799272
