@@ -228,46 +228,60 @@ r2_score(y_test,*pred)
 
 <h3>Default</h3>
 <div class="table-wrapper">
-	<table>
-		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Description</th>
-				<th>Price</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td>Item 1</td>
-				<td>This item costs money.</td>
-				<td>29.99</td>
-			</tr>
-			<tr>
-				<td>Item 2</td>
-				<td>And this one is not free either.</td>
-				<td>19.99</td>
-			</tr>
-			<tr>
-				<td>Item 3</td>
-				<td>Here we have another item.</td>
-				<td>29.99</td>
-			</tr>
-			<tr>
-				<td>Item 4</td>
-				<td>More items and stuff.</td>
-				<td>19.99</td>
-			</tr>
-			<tr>
-				<td>Item 5</td>
-				<td>The last item and stuff.</td>
-				<td>29.99</td>
-			</tr>
-		</tbody>
-		<tfoot>
-			<tr>
-				<td colspan="2"></td>
-				<td>100.00</td>
-			</tr>
-		</tfoot>
-	</table>
+	<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+      <th>n_eff</th>
+      <th>Rhat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>alpha__0</th>
+      <td>0.480106</td>
+      <td>0.037595</td>
+      <td>0.000774</td>
+      <td>0.405709</td>
+      <td>0.550487</td>
+      <td>2975.210769</td>
+      <td>1.001104</td>
+    </tr>
+    <tr>
+      <th>betas__0_0</th>
+      <td>1.557257</td>
+      <td>0.036890</td>
+      <td>0.000658</td>
+      <td>1.487401</td>
+      <td>1.628156</td>
+      <td>3147.314093</td>
+      <td>0.999515</td>
+    </tr>
+    <tr>
+      <th>betas__0_1</th>
+      <td>-1.562830</td>
+      <td>0.038143</td>
+      <td>0.000744</td>
+      <td>-1.634971</td>
+      <td>-1.484338</td>
+      <td>2849.492200</td>
+      <td>0.999755</td>
+    </tr>
+    <tr>
+      <th>s</th>
+      <td>0.986880</td>
+      <td>0.027428</td>
+      <td>0.000468</td>
+      <td>0.930528</td>
+      <td>1.038020</td>
+      <td>3049.781251</td>
+      <td>0.999667</td>
+    </tr>
+  </tbody>
+</table>
 </div>
