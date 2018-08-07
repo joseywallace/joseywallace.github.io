@@ -126,7 +126,7 @@ pm.summary(nuts_trace[1000:])
 </style>
 <class="dataframe">
   <thead>
-    <tr>
+    <tr style="text-align: right;">
       <th></th>
       <th>mean</th>
       <th>sd</th>
