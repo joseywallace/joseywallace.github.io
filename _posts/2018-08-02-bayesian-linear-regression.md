@@ -124,7 +124,7 @@ pm.summary(nuts_trace[1000:])
         text-align: right;
     }
 </style>
-<class="dataframe">
+<table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
