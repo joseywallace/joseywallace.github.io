@@ -7,14 +7,14 @@ sitemap:
     lastmod: 2018-08-02
     changefreq: weekly
 ---
-<span class="image left"><img src="{{ "/images/IMG_0721_crop.jpg" | absolute_url }}" alt="" /></span>
+<span class="image left"><img src="{{ "/images/IMG_0721_crop.jpg" | absolute_url }}" width="100px" alt="" /></span>
 In saying that, a one-measure fits-all approach won't do the trick with regards to content promoting. Rather, an emphasis on making remarkable, high caliber and totally genuine content that is engaging, helpful and fascinating for customers will get you the crown. From content, video and symbolism to infographics, studies, online courses and podcasts, whatever your favored content medium is, guarantee it is shareable and pertinent to your industry. /
 /
 
 ## Engineer
 <div class="box">
   <p>
-Hi, I'm Josey Wallace, a senior process engineer at Intel Mask Operations.  At Intel I specialize in technology development for next-gen electron beam lithography processes. However, my background is nuclear science and radiation damage. During my PhD, I published articles that were purely experimental, purely computer modeling, and many that were a combination of the two. 
+Hi, I'm Josey Wallace, a senior process engineer at Intel, where Intel I specialize in technology development for next-gen electron beam lithography processes. However, my background is nuclear science and radiation damage. During my PhD, I published articles that were purely experimental, purely computer modeling, and many that were a combination of the two. 
   </p>
 </div>
 ## Scientist
