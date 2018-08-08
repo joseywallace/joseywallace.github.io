@@ -8,8 +8,7 @@ sitemap:
     changefreq: weekly
 ---
 <span class="image left"><img src="{{ "/images/IMG_0721_crop.jpg" | absolute_url }}" width="100" alt="" /></span>
-
-In saying that, a one-measure fits-all approach won't do the trick with regards to content promoting. Rather, an emphasis on making remarkable, high caliber and totally genuine content that is engaging, helpful and fascinating for customers will get you the crown. From content, video and symbolism to infographics, studies, online courses and podcasts, whatever your favored content medium is, guarantee it is shareable and pertinent to your industry.
+Hi, I'm Joseph Wallace; An Engineer, Scientist, and lifelong learner. I currently work at Intel where I specialize in technology development and optimization for next-gen electron beam lithography processes. Prior to this I was designing and conducting pulsed ion beam experiments at Lawrence Livermore National Laboratory to probe the lifetime of radiation generated defects in materials. Prior to this I was working on PhD in Nuclear Engineering at Texas A&M University. Prior to this I was born. :)
         
         
 <br />
