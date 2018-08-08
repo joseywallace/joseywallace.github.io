@@ -7,7 +7,7 @@ sitemap:
     lastmod: 2018-08-02
     changefreq: weekly
 ---
-<span class="image left"><img src="{{ "/images/IMG_0721_crop.jpg" | absolute_url }}" width="100px" alt="" /></span>
+<img align="left" src="/images/IMG_0721_crop.jpg">
 In saying that, a one-measure fits-all approach won't do the trick with regards to content promoting. Rather, an emphasis on making remarkable, high caliber and totally genuine content that is engaging, helpful and fascinating for customers will get you the crown. From content, video and symbolism to infographics, studies, online courses and podcasts, whatever your favored content medium is, guarantee it is shareable and pertinent to your industry. /
 /
 
@@ -39,3 +39,5 @@ Receiving the benefits of content is a certain something. Be that as it may, it'
 </div>
 
 On social media, we may share our own thoughts and advance our image notwithstanding spreading musings for different associations and affiliations. With such a critical number of associations with people and relationship on social media, our experience can be over-burden with a considerable measure of information.
+
+<span class="image left"><img src="{{ "/images/IMG_0721_crop.jpg" | absolute_url }}" width="100px" alt="" /></span>
