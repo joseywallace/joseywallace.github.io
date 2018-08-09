@@ -19,7 +19,7 @@ Bayesian linear regression (BLR) is a powerful tool in the field of data science
 ### Create the data 
 In this first step, the necessary libraries are imported and the data set is created. PyMC3 is the Bayesian analysis library and tehano is the back-end of PyMC3. Theano is necessary to import in order to create shared variables that can be used to switch out the test and train data.
 
-In this example, the data set has only two features and 1000 data points. However, these values can be changed through the 'num_features' and 'data_points' attributes. The variables 'beta_set' and 'alpha_set' are the slopes and intercept, respectively, that we will try to guess later.
+In this example, the data set has only two features and 1000 data points. However, these values can be changed through the *num_features* and *data_points* attributes. The variables *beta_set* and *alpha_set* are the slopes and intercept, respectively, that we will try to guess later.
 
 The variables X and y are created using the slope and intercept values and normally distributed random noise is added to Y. Finally, X and y are split into training and testing set via Sklearn's train_test_split function.
 
