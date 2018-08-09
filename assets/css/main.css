@@ -2506,11 +2506,11 @@
 	ol {
 		list-style: decimal;
 		margin: 0 0 2rem 0;
-		padding-left: 1.25rem;
+		padding-left: 2.25rem;
 	}
 
 		ol li {
-			padding-left: 0.25rem;
+			padding-left: 1.25rem;
 		}
 
 	ul {
