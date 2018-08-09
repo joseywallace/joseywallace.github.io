@@ -6,12 +6,12 @@ excerpt: "A motivating example for Sklearn users interested Bayesian analysis"
 image: "/images/pymc3_logo.png"
 --- 
 
-Bayesian linear regression (BLR) is a powerful tool in the field of data science. For example, such models can provide a probability density of parameter values as opposed to a single best-fit value as in the standard (Frequentist) linear regression. In addition, BLR can be used to fit to parameters within a specified interval or create hierarchical models. However, despite decades of development and open source libraries, BLR has yet to reach its full user-base potential. One key obstacle to this is overcoming the barrier to entry for new users. In this blog post I hope to remove some of these obstacles by demonstrating how to;
+Bayesian linear regression (BLR) is a powerful tool in the field of data science. For example, such models can provide a probability density of parameter values as opposed to a single best-fit value as in the standard (Frequentist) linear regression. In addition, BLR can be used to fit to parameters within a specified interval or create hierarchical models. However, despite decades of development and open source libraries, BLR has yet to reach its full user-base potential. One key obstacle to this is overcoming the barrier to entry for new users. In this blog post I hope to remove some of these obstacles by demonstrating how to:
 
-1. create a model
-2. train a model
-3. create a traceplot and summary statistics
-4.run the model on test data
+1. Create a model
+2. Train a model
+3. Create a traceplot and summary statistics
+4. Run the model on test data
 		
 
 ### Create the data 
@@ -19,7 +19,7 @@ In this first step, the necessary libraries are imported and the data set is cre
 
 In this example, the data set has only two features and 1000 data points. However, these values can be changed through the *num_features* and *data_points* attributes. The variables *beta_set* and *alpha_set* are the slopes and intercept, respectively, that we will try to guess later.
 
-The variables X and y are created using the slope and intercept values and normally distributed random noise is added to Y. Finally, X and y are split into training and testing set via Sklearn's train_test_split function.
+The variables *X* and *y* are created using the slope and intercept values and normally distributed random noise is added to *Y*. Finally, *X* and *y* are split into training and testing set via Sklearn's *train_test_split* function.
 
 **In [1]:**
 
