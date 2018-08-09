@@ -16,7 +16,7 @@ Hi, I'm Joseph Wallace; An Engineer, Scientist, and lifelong learner. I currentl
 ## Engineer
 <div class="box">
   <p>
-I currently work at Intel, as a Senior Process Engineer, pushing the limits of the electron beam lithography processes used to create photomask. This work requires a 'full-stack' data science approach as follows:
+I currently work at Intel, as a Senior Process Engineer, pushing the limits of the electron beam lithography processes used to create photomask. This work requires a data science approach as follows:
       <!-- Lists -->
 		<ol>
 			<li>Identify parameters of interest and implement equipment to monitor </li>
@@ -26,6 +26,8 @@ I currently work at Intel, as a Senior Process Engineer, pushing the limits of t
 			<li>Reduce sources of process-line correlation by adjusting tool operation</li>
 			<li>Design a machine learning model to account for remaining sources of correlation</li>
 		</ol>
+
+By combining the Statistical Process Control (SPC) approach with Machine Learning (ML) I was able to signifcantly reduce process variation that led to improved yield and tool uptime. 
       
   </p>
 </div>
