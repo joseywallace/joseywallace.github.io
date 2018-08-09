@@ -18,13 +18,12 @@ Hi, I'm Joseph Wallace; An Engineer, Scientist, and lifelong learner. I currentl
   <p>
 I currently work at Intel, as a Senior Process Engineer, pushing the limits of the electron beam lithography processes used to create photomask. This work requires a 'full-stack' data science approach as follows:
       <!-- Lists -->
-            <h3>Ordered</h3>
-			<ol>
-				<li>The first item on the list.</li>
-				<li>The second item.</li>
-				<li>And the fourth item</li>
-				<li>Just kidding that last one was the third.</li>
-			</ol>
+		<ol>
+			<li>The first item on the list.</li>
+			<li>The second item.</li>
+			<li>And the fourth item</li>
+			<li>Just kidding that last one was the third.</li>
+		</ol>
       
   </p>
 </div>
