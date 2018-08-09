@@ -34,14 +34,14 @@ By combining the Statistical Process Control (SPC) approach with Machine Learnin
 ## Scientist
 <div class="box">
   <p>
-Making steady content and conveying it well takes a great deal of research and, hence, time and exertion. Building a profound established comprehension of your target customer needs is critical as your principle objective ought to be to fulfill their requirements as awesome content. You should need to enhance their lives. Having significant content like this may not be simple by any methods. Be that as it may, in any case, it's a fundamental apparatus in the event that you expect to grow a fruitful and supportable business in the present web focused world.
+As a scientist at Lawrence Livermore National Laboratory, I designed and conducted pulsed ion beam experiments to probe the lifetime of radiation generated defects in silicon. Irradiations were performed on an Van der Graaf 4 MV particle accelerator. The results of these experiments found the lifetime of defects on the scale of ~0.1 - 100 microseconds, whereas previous estimates ranged from 100s of seconds to nanoseconds (an astonishishing 12 orders of magnitude!!). The results of these experiments resulted in ~12 publications (See Publications).
   </p>
 </div>
 
 ## Student
 <div class="box">
   <p>
-Receiving the benefits of content is a certain something. Be that as it may, it's so substantially less demanding once you begin conveying all the more successfully. The profitable content thought isn't just about bragging your item's capacities and general worth or your organization's achievements. You should concentrate less on advertising how awesome your item is and rather concentrate on indicating how valuable it is. This is a client focused approach as it concentrates on their issues and your answer for them. Making yourself fundamental is critical.
+At Texas A&M I graduated with a PhD in Nuclear Engineering in 2016 and did a double degree in Nuclear Engineering and Physics in undergrad. However, since finishing my PhD I have continued learning through online platforms such as Coursera and Edx. In the coming Spring, I plan to start classes in Georgia Tech's Online Masters of Science Computer Science (OMSCS). The flexibility of online courses has put the power of learning back into the students hands by eliminating the obstacels such as fixed time schedules and high cost. 
   </p>
 </div>
 
