@@ -7,7 +7,7 @@ image: "/images/pymc3_logo.png"
 --- 
 
 Bayesian linear regression (BLR) is a powerful tool in the field of data science. For example, such models can provide a probability density of parameter values as opposed to a single best-fit value as in the standard (Frequentist) linear regression. In addition, BLR can be used to fit to parameters within a specified interval or create hierarchical models. However, despite decades of development and open source libraries, BLR has yet to reach its full user-base potential. One key obstacle to this is overcoming the barrier to entry for new users. In this blog post I hope to remove some of these obstacles by demonstrating how to;
-<!-- Lists -->
+	<!-- Lists -->
 		<ol>
 			<li>create a model </li>
 			<li>train a model </li>
