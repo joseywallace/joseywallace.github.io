@@ -19,10 +19,12 @@ Hi, I'm Joseph Wallace; An Engineer, Scientist, and lifelong learner. I currentl
 I currently work at Intel, as a Senior Process Engineer, pushing the limits of the electron beam lithography processes used to create photomask. This work requires a 'full-stack' data science approach as follows:
       <!-- Lists -->
 		<ol>
-			<li>The first item on the list.</li>
-			<li>The second item.</li>
-			<li>And the fourth item</li>
-			<li>Just kidding that last one was the third.</li>
+			<li>Identify parameters of interest and implement equipment to monitor </li>
+			<li>Gather and reshape data from tool and setup SQL to upload to database</li>
+			<li>Create script to download data and perform data cleaning</li>
+			<li>Perform exploratory data analysis to identify correlations</li>
+			<li>Reduce sources of process-line correlation by adjusting tool operation</li>
+			<li>Design a machine learning model to account for remaining sources of correlation</li>
 		</ol>
       
   </p>
