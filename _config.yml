@@ -1,7 +1,7 @@
 # Site
 title:              Joseph Wallace
 bio:                'Scientist and Engineer'
-description:        "Jekyll version of the Massively theme by HTML5UP"
+description:        "Home"
 locale:             en_US
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://joseywallace.github.io" # the base hostname & protocol for your site
@@ -41,10 +41,9 @@ researchgate:       profile/Joseph_Wallace5
 github:             default
 
 # personal
-location:           Los Angeles, CA
-phone:              310-318-5555
-email:              info@default.com
-
+location:           Silicon Valley, CA
+phone:              
+email:              
 # Gems
 gems:
   - jekyll-mentions
