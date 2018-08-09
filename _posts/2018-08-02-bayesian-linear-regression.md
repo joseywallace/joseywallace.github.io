@@ -1,13 +1,27 @@
 ---
 layout: post
-title: Multivariable linear regression
+title: Bayesian multivariable linear regression in PyMC3
 date:   2018-08-02
-excerpt: "An short easy introduction to PyMC3"
+excerpt: "A motivating example for Sklearn users interested Bayesian analysis"
 image: "/images/pymc3_logo.png"
 --- 
 
-## Multivariable linear regression
+Bayesian linear regression (BLR) is a powerful tool in the field of data science. For example, such models can provide a probability density of parameter values as opposed to a single best-fit value as in the standard (Frequentist) linear regression. In addition, BLR can be used to fit to parameters within a specified interval or create hierarchical models. However, despite decades of development and open source libraries, BLR has yet to reach its full user-base potential. One key obstacle to this is overcoming the barrier to entry for new users. In this blog post I hope to remove some of these obstacles by demonstrating how to;
+<!-- Lists -->
+		<ol>
+			<li>create a model </li>
+			<li>train a model </li>
+			<li>create a traceplot and summary statistics </li>
+			<li>run the model on test data </li>
+		</ol>
+		
+
 ### Create the data 
+In this first step, the necessary libraries are imported and the data set is created. PyMC3 is the Bayesian analysis library and tehano is the back-end of PyMC3. Theano is necessary to import in order to create shared variables that can be used to switch out the test and train data.
+
+In this example, the data set has only two features and 1000 data points. However, these values can be changed through the 'num_features' and 'data_points' attributes. The variables 'beta_set' and 'alpha_set' are the slopes and intercept, respectively, that we will try to guess later.
+
+The variables X and y are created using the slope and intercept values and normally distributed random noise is added to Y. Finally, X and y are split into training and testing set via Sklearn's train_test_split function.
 
 **In [1]:**
 
@@ -29,7 +43,6 @@ alpha_set = np.random.normal(size=1)
 
 X = np.random.normal(size=(data_points, num_features))
 y = alpha_set + np.sum(beta_set*X, axis=1) + np.random.normal(size=(data_points))
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 {% endhighlight %}
 
@@ -37,6 +50,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random
     
  
 ### Plot the data set 
+Next, let's visualize the data we are fitting. 
 
 **In [4]:**
 
