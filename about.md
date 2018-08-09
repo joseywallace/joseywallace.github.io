@@ -1,23 +1,31 @@
 ---
 layout: page
-title: Jekylls Theme - About - Massively
-description: When building a website it's helpful to see what the focus of your site is. This page is an example of how to show a website's focus.
+title: Joseph Wallace - About
+description: temasd
 sitemap:
     priority: 0.7
     lastmod: 2018-08-02
     changefreq: weekly
 ---
 <span class="image left"><img src="{{ "/images/IMG_0721_crop.jpg" | absolute_url }}" width="100" alt="" /></span>
-Hi, I'm Joseph Wallace; An Engineer, Scientist, and lifelong learner. I currently work at Intel where I specialize in technology development and optimization for next-gen electron beam lithography processes. Prior to this I was designing and conducting pulsed ion beam experiments at Lawrence Livermore National Laboratory to probe the lifetime of radiation generated defects in materials. Prior to this I was working on PhD in Nuclear Engineering at Texas A&M University. Prior to this I was born. :)
-        
-        
+Hi, I'm Joseph Wallace; An Engineer, Scientist, and lifelong learner. I currently work at Intel where I specialize in technology development and optimization for next-gen electron beam lithography processes. Prior to this I was designing and conducting pulsed ion beam experiments at Lawrence Livermore National Laboratory to probe the lifetime of radiation generated defects in materials, while working on a PhD in Nuclear Engineering at Texas A&M University. 
+
 <br />
 <br />
         
 ## Engineer
 <div class="box">
   <p>
-Hi, I'm Josey Wallace, a senior process engineer at Intel, where Intel I specialize in technology development for next-gen electron beam lithography processes. However, my background is nuclear science and radiation damage. During my PhD, I published articles that were purely experimental, purely computer modeling, and many that were a combination of the two. 
+I currently work at Intel, as a Senior Process Engineer, pushing the limits of the electron beam lithography processes used to create photomask. This work requires a 'full-stack' data science approach as follows:
+      <!-- Lists -->
+            <h3>Ordered</h3>
+			<ol>
+				<li>The first item on the list.</li>
+				<li>The second item.</li>
+				<li>And the fourth item</li>
+				<li>Just kidding that last one was the third.</li>
+			</ol>
+      
   </p>
 </div>
 ## Scientist
@@ -34,12 +42,4 @@ Receiving the benefits of content is a certain something. Be that as it may, it'
   </p>
 </div>
 
-### Content is Imortant
-<div class="box">
-  <p>
-  In saying that, a one-measure fits-all approach won't do the trick with regards to content promoting. Rather, an emphasis on making remarkable, high caliber and totally genuine content that is engaging, helpful and fascinating for customers will get you the crown. From content, video and symbolism to infographics, studies, online courses and podcasts, whatever your favored content medium is, guarantee it is shareable and pertinent to your industry.
-  </p>
-</div>
-
-On social media, we may share our own thoughts and advance our image notwithstanding spreading musings for different associations and affiliations. With such a critical number of associations with people and relationship on social media, our experience can be over-burden with a considerable measure of information.
 
