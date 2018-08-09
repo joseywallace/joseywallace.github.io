@@ -2,11 +2,11 @@
 layout: post
 title: Bayesian multivariable linear regression in PyMC3
 date:   2018-08-02
-excerpt: "A motivating example for Sklearn users interested Bayesian analysis"
+excerpt: "A motivating example for Sklearn users interested in Bayesian analysis"
 image: "/images/pymc3_logo.png"
 --- 
 
-Bayesian linear regression (BLR) is a powerful tool in the field of data science. For example, such models can provide a probability density of parameter values as opposed to a single best-fit value as in the standard (Frequentist) linear regression. In addition, BLR can be used to fit to parameters within a specified interval or create hierarchical models. However, despite decades of development and open source libraries, BLR has yet to reach its full user-base potential. One key obstacle to this is overcoming the barrier to entry for new users. In this blog post I hope to remove some of these obstacles by demonstrating how to:
+Bayesian linear regression (BLR) is a powerful tool in the field of data science. BLR models can provide a probability density of parameter values as opposed to a single best-fit value as in the standard (Frequentist) linear regression. In addition, BLR can be used to fit to parameters within a specified interval or create hierarchical models. However, despite decades of development and open source libraries, BLR has yet to reach its full user-base potential. One key obstacle to this is overcoming the barrier to entry for new users. In this blog post I hope to remove some of these obstacles by demonstrating how to:
 
 1. Create a model
 2. Train a model
@@ -43,8 +43,6 @@ X = np.random.normal(size=(data_points, num_features))
 y = alpha_set + np.sum(beta_set*X, axis=1) + np.random.normal(size=(data_points))
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 {% endhighlight %}
-
-    WARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.
     
  
 ### Plot the data set 
