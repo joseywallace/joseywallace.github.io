@@ -19,6 +19,8 @@
 </div>
 
 ## CONFERENCE PRESENTATIONS
+<div class="box">
+  <p>
 	<!-- Lists -->
 		<ol>
 			<li>2014 CAARI Conference, San Antonio, May 25-30, 2014. “Radiation effects on nano mechanics of low dimensional carbon systems” Symposium NST03: Graphene, Carbon Nanotubes and Composites.</li>
@@ -26,3 +28,5 @@
 			<li>2016 MRS Spring Meeting, Phoenix, March 28th – April 1st, 2016. “Dominant role of Vacancy and Interstitial Diffusion in Dynamic Annealing in Ion-Irradiated Si” Symposium EE: Radiation Damage in Materials- A Grand Multiscale Challenge.</li>
 			<li>2016 CAARI Conference, Fort Worth, November 1-6, 2016. “Radiation defect dynamics studied by pulsed ion beams”  Symposium RE-04: Radiation Response of Materials Toward Reactor Applications.</li>
 		</ol>
+  </p>
+</div>
