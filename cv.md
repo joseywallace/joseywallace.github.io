@@ -36,6 +36,7 @@
   <p>
 	  <!-- Lists -->
 		<ol>
+			<li>J. B. Wallace, L. B. Bayu Aji, L. Shao, and S. O. Kucheyev. “Deterministic Role of Collision Cascade Density in Radiation Defect Dynamics in Si”, Sci. Rep. 120, 216101 (2018). </li>
 			<li>L. B. Bayu Aji, J. B. Wallace, L. Shao, and S. O. Kucheyev. “Radiation defect dynamics in GaAs studied by pulsed ion beams”, J. Appl. Phys. 124, 025701 (2017).</li>
 			<li>J. B. Wallace, L. B. Bayu Aji, A. A. Martin, S. J. Shin, L. Shao, and S. O. Kucheyev. “Fractal analysis of collision cascades in pulsed-ion-beam-irradiated solids”, Sci. Rep. 7, 17574 (2017). </li>
 			<li>J. B. Wallace, L. B. Bayu Aji, L. Shao, and S. O. Kucheyev. “Dynamic annealing in Ge studied by pulsed ion beams.”, Sci. Rep. 7, 13182 (2017).</li>
