@@ -1,3 +1,13 @@
+---
+layout: page
+title: Joseph Wallace - CV
+description: CV/Resume
+sitemap:
+    priority: 0.7
+    lastmod: 2018-08-02
+    changefreq: weekly
+---
+
 ## PROFESSIONAL EXPERIENCE
 <div class="box">
   <p>
