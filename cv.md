@@ -12,7 +12,7 @@
 ## EDUCATION
 <div class="box">
   <p>
-2016-11		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ph.D., Nuclear Engineering, Texas A&M University, College Station, TX <br />
+2016-11		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ph.D., Nuclear Engineering, Texas A&M University, College Station, TX <br />
 2011-06		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Nuclear Engineering, Texas A&M University, College Station, TX <br />
 2011-06		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Physics, Texas A&M University, College Station, TX <br />
   </p>
