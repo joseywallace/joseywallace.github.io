@@ -24,20 +24,9 @@
 	<!-- Lists -->
 		<ol>
 			<li><b>2014 CAARI Conference</b>, San Antonio, TX. Symposium NST03: Graphene, Carbon Nanotubes and Composites. <br /><i>Radiation effects on nano mechanics of low dimensional carbon systems.</i></li>
-			<li><b>2015 MRS Spring Meeting</b>, San Francisco, CA. <i>Dynamics of Radiation Defect Production Studied by Pulsed Ion Beams</i> Symposium XX: Multiscale Modeling and Experiments on Microstructural Evolution in Nuclear Materials.</li>
-			<li><b>2016 MRS Spring Meeting</b>, Phoenix, AZ. <i>Dominant role of Vacancy and Interstitial Diffusion in Dynamic Annealing in Ion-Irradiated Si</i> Symposium EE: Radiation Damage in Materials- A Grand Multiscale Challenge.</li>
-			<li><b>2016 CAARI Conference</b>, Fort Worth, TX. <i>Radiation defect dynamics studied by pulsed ion beams</i>  Symposium RE-04: Radiation Response of Materials Toward Reactor Applications.</li>
-		</ol>
-  </p>
-</div>
-
-## CONFERENCE PRESENTATIONS
-<div class="box">
-  <p>
-	1. <bold>2014 CAARI Conference</bold>, San Antonio, May 25-30, 2014. “*Radiation effects on nano mechanics of low dimensional carbon systems*” Symposium NST03: Graphene, Carbon Nanotubes and Composites.</li>
-			<li>**2015 MRS Spring Meeting**, San Francisco, April 6-10, 2015. “*Dynamics of Radiation Defect Production Studied by Pulsed Ion Beams*” Symposium XX: Multiscale Modeling and Experiments on Microstructural Evolution in Nuclear Materials.</li>
-			<li>**2016 MRS Spring Meeting**, Phoenix, March 28th – April 1st, 2016. “*Dominant role of Vacancy and Interstitial Diffusion in Dynamic Annealing in Ion-Irradiated Si*” Symposium EE: Radiation Damage in Materials- A Grand Multiscale Challenge.</li>
-			<li>**2016 CAARI Conference**, Fort Worth, November 1-6, 2016. *Radiation defect dynamics studied by pulsed ion beams*  Symposium RE-04: Radiation Response of Materials Toward Reactor Applications.</li>
+			<li><b>2015 MRS Spring Meeting</b>, San Francisco, CA. Symposium XX: Multiscale Modeling and Experiments on Microstructural Evolution in Nuclear Materials. <i>Dynamics of Radiation Defect Production Studied by Pulsed Ion Beams</i></li>
+			<li><b>2016 MRS Spring Meeting</b>, Phoenix, AZ. Symposium EE: Radiation Damage in Materials- A Grand Multiscale Challenge. <i>Dominant role of Vacancy and Interstitial Diffusion in Dynamic Annealing in Ion-Irradiated Si</i></li>
+			<li><b>2016 CAARI Conference</b>, Fort Worth, TX. Symposium RE-04: Radiation Response of Materials Toward Reactor Applications. <i>Radiation defect dynamics studied by pulsed ion beams</i></li>
 		</ol>
   </p>
 </div>
