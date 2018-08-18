@@ -1,16 +1,13 @@
 ## PROFESSIONAL EXPERIENCE
 <div class="box">
   <p>
-2017-18    Senior Process Engineer, Intel <br />
-2014-17    Lawrence Scholar Fellow, Lawrence Livermore National Laboratory <br />
-2011-14    Graduate Research Assistant under Dr. Lin Shao, Texas A&M University <br />
-2009-11    Undergraduate Researcher at the Ion Materials Facility (IMF), Texas A&M University <br />
-2008-09    Undergraduate Researcher under Dr. Marvin L. Adams, Texas A&M University <br />
+2017-18    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Senior Process Engineer, Intel <br />
+2014-17    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lawrence Scholar Fellow, Lawrence Livermore National Laboratory <br />
+2011-14    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Graduate Research Assistant under Dr. Lin Shao, Texas A&M University <br />
+2009-11    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Undergraduate Researcher at the Ion Materials Facility (IMF), Texas A&M University <br />
+2008-09    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Undergraduate Researcher under Dr. Marvin L. Adams, Texas A&M University <br />
   </p>
 </div>
-aa|bb|cc
---|--|--
-ee|ff|gg 
 
 ## EDUCATION
 <div class="box">
