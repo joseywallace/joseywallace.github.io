@@ -23,7 +23,7 @@
   <p>
 	<!-- Lists -->
 		<ol>
-			<li><b>2014 CAARI Conference</b>, San Antonio, TX.  <br /> <i>Radiation effects on nano mechanics of low dimensional carbon systems</i> Symposium NST03: Graphene, Carbon Nanotubes and Composites.</li>
+			<li><b>2014 CAARI Conference</b>, San Antonio, TX. <i>Radiation effects on nano mechanics of low dimensional carbon systems.</i> Symposium NST03: Graphene, Carbon Nanotubes and Composites.</li>
 			
 			<li><b>2015 MRS Spring Meeting</b>, San Francisco, CA. <i>Dynamics of Radiation Defect Production Studied by Pulsed Ion Beams</i> Symposium XX: Multiscale Modeling and Experiments on Microstructural Evolution in Nuclear Materials.</li>
 			<li><b>2016 MRS Spring Meeting</b>, Phoenix, AZ. <i>Dominant role of Vacancy and Interstitial Diffusion in Dynamic Annealing in Ion-Irradiated Si</i> Symposium EE: Radiation Damage in Materials- A Grand Multiscale Challenge.</li>
