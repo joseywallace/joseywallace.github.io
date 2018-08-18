@@ -36,24 +36,22 @@
   <p>
 	  <!-- Lists -->
 		<ol>
-			<li>J.B. Wallace, D. Chen, J. Wang and, L. Shao, Nucl. Instrum. Methods. Phys. Res. B 307, 81 (2013).</li>
-			<li>J.B. Wallace and L. Shao, Carbon 91, 96 (2015).</li>
-			<li>J.B. Wallace, D. Chen and, L. Shao, Mater. Res. Lett. 4, 55 (2015).</li>
-			<li>J. Wang, D. Chen, J.B. Wallace, J. Gigax, X. Wang and, L. Shao, Appl. Phys. Lett. 104, 191902 (2014).</li>
-			<li>J.B. Wallace, L.B. Bayu Aji, L. Shao, and S.O. Kucheyev, Appl. Phys. Lett. 106, 202102 (2015).</li>
-			<li>J.B. Wallace, L.B. Bayu Aji, T.T. Li, L. Shao, and S.O. Kucheyev, J. Appl. Phys. 118, 105705 (2015).</li>
-			<li>J.B. Wallace, S. Charnvanichborikarn, L.B. Bayu Aji, M.T. Myers, L. Shao, and S.O. Kucheyev, J. Appl. Phys. 118, 135709 (2015).</li>
-			<li>L. B. Bayu Aji, J. B. Wallace, L. Shao, and S. O. Kucheyev, J. Phys. D: Appl. Phys. 49, 19LT01 (2016). </li>
-			<li>J. B. Wallace, L. B. Bayu Aji, A. A. Martin, S. J. Shin, L. Shao, and S. O. Kucheyev. “The role of Frenkel defect diffusion in dynamic annealing in ion-irradiated Si”, Submitted to Phys. Rev. Lett. (2016). </li>
-			<li>L. B. Bayu Aji, J. B. Wallace, L. Shao, and S. O. Kucheyev. “Temperature dependence of radiation defect dynamics in 4H-SiC”, Submitted to Sci. Rep. (2016).</li>
-			<li>J. B. Wallace, L. B. Bayu Aji, L. Shao, and S. O. Kucheyev. “Dynamic annealing in Ge studied by pulsed ion beams.”, Submitted to Appl. Phys. Lett. (2016).</li>
-			<li>L. B. Bayu Aji, J. B. Wallace, L. Shao, and S. O. Kucheyev. “Radiation damage dynamics in SiC: a comparative study of 3C- and 4H-SiC.” Submitted to Sci. Rep. (2016).</li>
-			<li>L. B. Bayu Aji, J. B. Wallace, and S. O. Kucheyev. “Ion mass effect on radiation defect dynamics in SiC.” Submitted to Sci. Rep. (2016).</li>
-			<li>L. B. Bayu Aji, T. T. Li, J. B. Wallace, A. A. Martin, and S. O. Kucheyev. “Influence of dose-rate on damage accumulation in 3C-SiC.”, Under preparation (2016).</li>
-			<li>J.B. Wallace, L.B. Bayu Aji, L. Shao, S.O. Kucheyev. “Anomalous cascade density effect of radiation damage dynamics in Si.”, Under preparation (2016).</li>
-			<li>J.B. Wallace, L.B. Bayu Aji, L. Shao, S.O. Kucheyev. “Influence of crystalline defects on radiation defect dynamics in Si.”, Under preparation (2016).</li>
-			<li>J.B. Wallace, L.B. Bayu Aji, L. Shao, S.O. Kucheyev. “Dependence of the pulsed ion beam measured defect lifetime on the active portion of the beam duty cycle.”, Under preparation (2016).</li>
-			<li>A. A. Martin, L. B. Bayu Aji, J. B. Wallace, L. Shao, and S. O. Kucheyev. “Pulsed ion beam study of radiation defect dynamics in gallium arsenide.”, Under preparation (2016).</li>
+			<li>L. B. Bayu Aji, J. B. Wallace, L. Shao, and S. O. Kucheyev. “Radiation defect dynamics in GaAs studied by pulsed ion beams”, J. Appl. Phys. 124, 025701 (2017).</li>
+			<li>J. B. Wallace, L. B. Bayu Aji, A. A. Martin, S. J. Shin, L. Shao, and S. O. Kucheyev. “Fractal analysis of collision cascades in pulsed-ion-beam-irradiated solids”, Sci. Rep. 7, 17574 (2017). </li>
+			<li>J. B. Wallace, L. B. Bayu Aji, L. Shao, and S. O. Kucheyev. “Dynamic annealing in Ge studied by pulsed ion beams.”, Sci. Rep. 7, 13182 (2017).</li>
+			<li>L. B. Bayu Aji, J. B. Wallace, L. Shao, and S. O. Kucheyev. “Effects of collision cascade density on radiation defect dynamics in 3C-SiC”, Sci. Rep. 7, 44703 (2017).</li>
+			<li>J.B. Wallace, L.B. Bayu Aji, L. Shao, and S.O. Kucheyev. "Radiation defect dynamics studied by pulsed ion beams", Nucl. Instrum. Methods. Phys. Res. B 409, 347 (2017).</li>
+			<li>J. B. Wallace, L. B. Bayu Aji, A. A. Martin, S. J. Shin, L. Shao, and S. O. Kucheyev. “The role of Frenkel defect diffusion in dynamic annealing in ion-irradiated Si”, Sci. Rep. 7, 39754 (2017). </li>
+			<li>L. B. Bayu Aji, J. B. Wallace, L. Shao, and S. O. Kucheyev. “Non-monotonic temperature dependence of radiation defect dynamics in silicon carbide”, Sci. Rep. 6, 30931 (2016).</li>
+			<li>L. B. Bayu Aji, J. B. Wallace, L. Shao, and S. O. Kucheyev. "Effective defect diffusion lengths in Ar-ion bombarded 3C-SiC", J. Phys. D: Appl. Phys. 49, 19LT01 (2016). </li>
+			<li>J.B. Wallace, S. Charnvanichborikarn, L.B. Bayu Aji, M.T. Myers, L. Shao, and S.O. Kucheyev. "Radiation defect dynamics in Si at room temperature studied by pulsed ion beams", J. Appl. Phys. 118, 135709 (2015).</li>
+			<li>J.B. Wallace, L.B. Bayu Aji, T.T. Li, L. Shao, and S.O. Kucheyev. "Damage buildup in Ar-ion-irradiated 3C-SiC at elevated temperatures", J. Appl. Phys. 118, 105705 (2015).</li>
+			<li>J.B. Wallace, L.B. Bayu Aji, L. Shao, and S.O. Kucheyev. "Time constant of defect relaxation in ion-irradiated 3C-SiC", Appl. Phys. Lett. 106, 202102 (2015).</li>
+			<li>J. Wang, D. Chen, J.B. Wallace, J. Gigax, X. Wang and, L. Shao. "Introducing thermally stable inter-tube defects to assist off-axial phonon transport in carbon nanotube films", Appl. Phys. Lett. 104, 191902 (2014).</li>
+			<li>J.B. Wallace, D. Chen and, L. Shao. "Carbon Displacement-Induced Single Carbon Atomic Chain Formation and its Effects on Sliding of SiC Fibers in SiC/graphene/SiC Composite", Mater. Res. Lett. 4, 55 (2015).</li>
+			<li>J.B. Wallace and L. Shao. "Defect-induced carbon nanoscroll formation", Carbon 91, 96 (2015).</li>
+			<li>J.B. Wallace, D. Chen, J. Wang and, L. Shao. "Molecular dynamics simulation of damage cascade creation in SiC composites containing SiC/graphite interface", Nucl. Instrum. Methods. Phys. Res. B 307, 81 (2013).</li>
+
 		</ol>
   </p>
 </div>
