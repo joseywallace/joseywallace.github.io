@@ -91,7 +91,7 @@ with lin_reg_model:
 It is often difficult to visualize the model from the several lines of code above. When first building a model, it is helpful to draw out your design as shown below. 
 <figure> 
 <span class="image fit">
-        <img src="{{ "/images/Slide1_edit.PNG" | absolute_url }}" alt="" style="width:400px;height:400px;"/>
+        <img src="{{ "/images/Slide1_edit.png" | absolute_url }}" alt="" style="width:400px;height:400px;"/>
         <figcaption><b>Figure 2.</b> Hierarchical diagram of the multiple linear regression model.</figcaption>
 </span>
 </figure>
@@ -127,7 +127,7 @@ plt.show()
 <figure> 
 <span class="image fit">
         <img src="{{ "/images/output_9_0.png" | absolute_url }}" alt="" />
-        <figcaption><b>Figure 2.</b> Traceplot showing the posterior distributions (left pane) and sampling history (right pane) for <i>Alpha</i>, <i>Beta</i> for both features, and <i>sigma</i>.</figcaption>
+        <figcaption><b>Figure 3.</b> Traceplot showing the posterior distributions (left pane) and sampling history (right pane) for <i>Alpha</i>, <i>Beta</i> for both features, and <i>sigma</i>.</figcaption>
 </span>
 </figure>
 
