@@ -2,7 +2,7 @@
 layout: post
 title: Image Stabilization Via Gaussian Filters in OpenCV
 date:   2019-04-01
-excerpt: "This post demonstrates the process of stabilizing shaky video"
+excerpt: "Stabilizing shaky video via parametric image alignment and guassian smoothing"
 image: "/images/2019-04-01_cover.png"
 ---
 This tutorial demonstrates the process of image stabilization in python using the OpenCV library. The code for this demonstration, including several helper functions used to plot and visualize the transformation can be foudn on my github page below. The image stabilizaation pipeline involves three main steps -- (1) determining the original path of the camera, (2) smoothing this path, and (3) applying the smoothed path to the image set. 
@@ -203,4 +203,17 @@ A good image stabilization algorithm should be fairly stable against salient poi
 </span>
 </figure>
 
-In both cases I reused the same sigma matrix as used above in Fig. 5.
+In both cases I reused the same sigma matrix as used above in Fig. 5. Both videos appear quite stable against salient image points. From these examples we can see that the gaussian kernel smoothing is quite effective at stabilizing images. However, compared to the state-of-the-art image stabilization work done by google[2-3], these stabilization techniques are still quite primitive. Google's algorithm actually uses cinamatography principles to determine the ideal path. They assume that the desired path should be composed of constant, linear, and parabolic segments only. This methodology eliminates unwanted camera drift and that a simple gaussian convolution would not remove. More on this technique to come!
+
+
+## References
+
+[1] <a href="https://ieeexplore.ieee.org/document/4515873">G. D. Evangelidis and E. Z. Psarakis, "Parametric Image Alignment Using Enhanced Correlation Coefficient Maximization," in IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 30, no. 10, pp. 1858-1865, Oct. 2008.</a>
+
+[2] <a href="https://www.cc.gatech.edu/cpl/projects/videostabilization/">M. Grundmann, V. Kwatra and I. Essa, "Auto-directed video stabilization with robust L1 optimal camera paths," CVPR 2011, Colorado Springs, CO, USA, 2011, pp. 225-232.</a>
+
+[3] <a href="https://ai.googleblog.com/2011/06/auto-directed-video-stabilization-with.html"> Google AI Blog: Auto-Directed Video Stabilization with Robust L1 Optimal Camera Paths"</a>
+
+[4] <a href="https://www.learnopencv.com/video-stabilization-using-point-feature-matching-in-opencv/">Learn OpenCV: Video Stabilization Using Point Feature Matching in OpenCV"</a>
+
+*__Note: This code was originally written in partial fulfillment of Georgia Tech's CS6475 (Computational Photography)__*.
