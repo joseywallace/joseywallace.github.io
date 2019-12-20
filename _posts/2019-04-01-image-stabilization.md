@@ -2,7 +2,7 @@
 layout: post
 title: Image Stabilization Via Gaussian Filters in OpenCV
 date:   2019-04-01
-excerpt: "Stabilizing shaky video via parametric image alignment and guassian smoothing"
+excerpt: "Stabilizing shaky video via parametric image alignment and Guassian smoothing"
 image: "/images/2019-04-01_cover.png"
 ---
 This tutorial demonstrates the process of image stabilization in python using the OpenCV library. The code for this demonstration, including several helper functions used to plot and visualize the transformation can be foudn on my github page below. The image stabilizaation pipeline involves three main steps -- (1) determining the original path of the camera, (2) smoothing this path, and (3) applying the smoothed path to the image set. 

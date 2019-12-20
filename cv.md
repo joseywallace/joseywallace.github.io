@@ -11,7 +11,7 @@ sitemap:
 ## PROFESSIONAL EXPERIENCE
 <div class="box">
   <p>
-2017-19    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Senior Process Engineer, Intel <br />
+2017-20    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Senior Process Engineer, Intel <br />
 2014-17    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lawrence Scholar Fellow, Lawrence Livermore National Laboratory <br />
 2011-14    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Graduate Research Assistant under Dr. Lin Shao, Texas A&M University <br />
 2008-11    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Undergraduate Researcher in Nuclear Engineering, Texas A&M University <br />
@@ -21,7 +21,7 @@ sitemap:
 ## EDUCATION
 <div class="box">
   <p>
-2019-20         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M.S., Computer Science, Georgia Institute of Technology, Atlanta, GA <br />
+2019-21         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M.S., Computer Science, Georgia Institute of Technology, Atlanta, GA <br />
 2017-11		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ph.D., Nuclear Engineering, Texas A&M University, College Station, TX <br />
 2011-06		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Nuclear Engineering, Texas A&M University, College Station, TX <br />
 2011-06		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Physics, Texas A&M University, College Station, TX <br />
