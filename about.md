@@ -41,6 +41,6 @@ As a scientist at Lawrence Livermore National Laboratory, I designed and conduct
 ## Student
 <div class="box">
   <p>
-At Texas A&M I graduated with a PhD in Nuclear Engineering in 2016 and did a double degree in Nuclear Engineering and Physics in undergrad. However, since finishing my PhD I have continued learning through online platforms such as Coursera and Edx. In the coming Spring, I plan to start classes in Georgia Tech's Online Masters of Science Computer Science (OMSCS). The flexibility of online courses has put the power of learning back into the students hands by eliminating the obstacels such as fixed time schedules and high cost. 
+At Texas A&M I graduated with a PhD in Nuclear Engineering in 2016 and did a double degree in Nuclear Engineering and Physics in undergrad. However, since finishing my PhD I have continued learning through online platforms such as Coursera, Edx, and Udacity. I am currently working towards a Masters degree in Computer Science with a specialization in Machine Learning through Georgia Tech. 
   </p>
 </div>
