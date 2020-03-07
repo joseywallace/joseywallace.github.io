@@ -148,13 +148,13 @@ Watching the model train several times, I've noticed that the game seems to have
 </span>
 </figure>
 
-Figure 4 shows 4 clear distributions labeled (a)-(d). Distribution (a) seems to correspond to the death before the first bridge by one of the small helicopters (likely hard for the agent to see in the compressed image). Distribution (B) seems to correspond to making it past the first bridge and past the possibly past the first split in the river, but dying before the second bridge. Distribution (C) seems to have made it past the second bridge, but died before the third. Finally, distribution (D) has made it past the third bridge, but usually dies by running out of fuel. 
+Figure 4 shows 4 clear distributions labeled (a)-(d). Distribution (a) seems to correspond to the death before the first bridge by one of the small helicopters (likely hard for the agent to see in the compressed image). Distribution (B) seems to correspond to making it past the first bridge and past the first split in the river, but dying before the second bridge. Distribution (C) seems to have made it past the second bridge, but died before the third. Finally, distribution (D) has made it past the third bridge, but usually dies by running out of fuel. 
 
 It would make sense if there were a way to more greatly weight or increase the importance of how the agent died. This might allow the agent to focus more on its weaknesses and hence improve training speed. One simple method for achieving this is select the images from the replay buffer acording to some probability distribution describing the importance of each training snap shot. 
 
 ### References
 
-[1] Mnih, V., Kavukcuoglu, K., Silver, D. et al. Human-level control through deep reinforcement learning. Nature 518, 529–533 (2015). https://doi.org/10.1038/nature14236
+[1] Mnih, V., Kavukcuoglu, K., Silver, D. et al. *Human-level control through deep reinforcement learning.* Nature 518, 529–533 (2015). https://doi.org/10.1038/nature14236
 
 [2] Maxam Lapan, *Deep Reinforcement Learning Hands-On: Apply modern RL methods, with deep Q-networks, value iteration, policy gradients, TRPO, AlphaGo Zero and more.* Packt Publishing, Ch. 6 (2018).
 

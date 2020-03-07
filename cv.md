@@ -22,9 +22,9 @@ sitemap:
 <div class="box">
   <p>
 2019-21         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M.S., Computer Science, Georgia Institute of Technology, Atlanta, GA <br />
-2017-11		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ph.D., Nuclear Engineering, Texas A&M University, College Station, TX <br />
-2011-06		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Nuclear Engineering, Texas A&M University, College Station, TX <br />
-2011-06		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Physics, Texas A&M University, College Station, TX <br />
+2011-17		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ph.D., Nuclear Engineering, Texas A&M University, College Station, TX <br />
+2006-11		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Nuclear Engineering, Texas A&M University, College Station, TX <br />
+2006-11		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Physics, Texas A&M University, College Station, TX <br />
   </p>
 </div>
 
