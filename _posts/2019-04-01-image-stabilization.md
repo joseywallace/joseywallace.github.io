@@ -10,13 +10,13 @@ This tutorial demonstrates the process of image stabilization in python using th
 ## Finding the Camera's Path
 The camera’s path can be determined by finding the warp matrix from one image to the next in the series. This matrix allows us to transform or map from the one camera coordinate system to another. The first step in determining this matrix, is deciding on a suitable model for the geometric transformation from one frame to the next. The most common choices are either affine or pure translation, however, other methods rely on projective transformation (homography) or even non-linear transformations. In this tutorial, we will assume Euclidean motion and use the following transformation:
 <br><br/>
-<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\Large&space;
-\\
-\begin{bmatrix} x' \\ y' \end{bmatrix} &=&\begin{bmatrix} 1 & \sin\left ( \theta  \right ) \\ -\sin\left ( \theta \right ) & 1 \end{bmatrix}\begin{bmatrix} x \\ y \end{bmatrix} + \begin{bmatrix} T_{x}\\ T_{y} \end{bmatrix} \\
-\\
-\\
-\\
-&\begin{bmatrix} x' \\ y' \\ 1\end{bmatrix} &=&\begin{bmatrix} 1 & \sin\left ( \theta  \right ) & T_{x} \\ -\sin\left ( \theta \right ) & 1 & T_{y} \\ 0 & 0 & 1\end{bmatrix}\begin{bmatrix} x \\ y \\ 1 \end{bmatrix}" title="eq_1" /></p>
+
+<figure>
+<span class="image fit">
+        <img src="{{ "/images/eq01_image_stab.png" | absolute_url }}" alt="" />
+</span>
+</figure>
+
 
 Where, (x, y) and (x', y') are the pixel coordinates in the original and stabilized system, respectively. The vector (Tx, Ty) represents the camera's translation and &#952; is the camera's rotation, both relative to some initial reference frame. The second equation uses the homogeneous form which brings the translation and rotation terms into a single matrix. This matrix is known as the warp matrix, since it can be used to warp an image from one coordinate frame to another. 
 

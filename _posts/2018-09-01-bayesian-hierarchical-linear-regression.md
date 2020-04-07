@@ -40,8 +40,11 @@ plt.style.use('seaborn-darkgrid')
 
 In this example we are using fake or simulated data. This approach will allow the reader to easily manipulate the input parameters (categories, features, data points) and visualize the effect on the model. The test data set is create using the equation below:
 
-<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\Large&space;\begin{array}{rcl}
-y_i &=&\alpha + \textrm{Noise} + \sum_{j=1}^{n_{features}}\beta_{j,k}X_{ijk} \end{array}" title="eq_1" /></p>
+<figure>
+<span class="image fit">
+        <img src="{{ "/images/2018-09-02_eq01.png" | absolute_url }}" alt="" />
+</span>
+</figure>
 
 Where, &#945; is the intercept, *Noise* is the simulated noise in the data, &#946;<sub>jk</sub> is the slope for feature j of category k, and *X*<sub>ijk</sub> is the data value of category k for the jth feature of the ith data point).
 
@@ -133,10 +136,13 @@ where &#945; is the intercept, &#946;<sub>j,k</sub> is the slope for the jth fea
 
 The python code describing this hierarchy is shown below. The first few lines create the theano shared variables that will allow the training data to be switched out for the test data. All of the model parameters are then specified within the *with model* command. The code is written from the top of the hierarchy (__Fig. 2__), starting with hyper-priors *&#956;<sub>&#946;</sub>* and *&#963;<sub>&#946;</sub>* , down to the bottom of the hierarchy (*y<sub>ij</sub>*). It should be noted that the python code implements Eq. 2 slightly different from (although mathematically equivalent to) how the equation is shown in the hierarchy. The actual code implements *y<sub>est</sub>* as follows:
 <br><br/>
-<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\Large&space;\begin{array}{rcl}
-y_{est} &=&\alpha + \sum_{j=1}^{n_{features}}\boldsymbol{\beta_j}[C_k]X_{ijk} \\
-\\
-&=&\alpha + \sum_{j=1}^{n_{features}}\beta_{j,k}X_{ijk} \end{array}" title="eq_1" /></p>
+
+
+<figure>
+<span class="image fit">
+        <img src="{{ "/images/2018-09-02_eq02.png" | absolute_url }}" alt="" />
+</span>
+</figure>
 
 The variable &#945; is represented by the single normal distribution. The variable, &#946;<sub>j</sub>, is the jth element of the list comprehension, *beta*, describing the jth feature of the model. It is represented by the prior normal distributions and is of shape equal to the number of categories. For example, &#946;<sub>j</sub>[0] would return the value for the jth feature and 0th category normal distribution). The variable *C<sub>k</sub>* contains the category integer values (k) matching the category of *X<sub>ijk</sub>*. Thus, *&#946;<sub>j</sub>(C<sub>k</sub>)* results in an array of length equal to the total number of data points where the ith element is *&#946;<sub>jk</sub>* and *k* is the category associated with the ith data point *X<sub>ijk</sub>*.
 
