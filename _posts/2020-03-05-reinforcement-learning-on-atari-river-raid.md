@@ -132,7 +132,7 @@ The model appears to learn fairly quickly from ~400k to 700k and then begins to 
 <div class="video-responsive">
     <iframe width="420" height="315" src="https://www.youtube.com/embed/Q5UtnhxYbW0" frameborder="0" allowfullscreen></iframe>
 </div>
-    <figcaption><b>Figure 3.</b> Video containing sixteen episodes played by the final version of the agent with increasing score from left to right and top to bottom. The minimum score was 580 (upper left) and the maximum score was 3860 (lower right).</figcaption>
+    <figcaption><b>Figure 3.</b> Video containing twelve episodes played by the final version of the agent with increasing score from left to right and top to bottom. The minimum score was 580 (upper left) and the maximum score was 3860 (lower right).</figcaption>
 </figure>
 
 After about five rounds of river raid I was able to achieve a score similar to the maximum score observed from the model. The performance reported by Mnih et. al was ~8316 using all three lives. This score is slightly better than the score of ~6800 (across three lives) achieved in this report. The score of an expert player is reported by Mnih et al. to be ~13513. The difference in score between my agent and the one reported by Mnih et al. could be due to the fact that they rescaled the score to range from -1, 1 whereas I'm using the original score reported given by Atari. It could also be due to the length of time the models were allowed to train.

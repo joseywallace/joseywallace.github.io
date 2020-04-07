@@ -21,24 +21,37 @@ The figure below shows the simple single neuron model with two inputs and a sing
 
 It is useful to define *z* as shown below:
 
-<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\large&space;z = \sum_{k}w_{k}x_{k}+b" title="eq_1" /></p>
+<figure>
+<span class="image fit">
+        <img src="{{ "/images/eq01.png" | absolute_url }}" alt=""/>
+</span>
+</figure>
+
 
 Where *w<sub>k</sub>* are the weights, *x<sub>k</sub>* are the input values, and *b* is the bias. The *z* function, known as the weighted input to the neuron, is passed through a non-linearity function in this example a sigmoid. The sigmoid function allows us to optimize the weights and biases much more easily since as opposed to the perceptron model discussed above, the sigmoid is continuous. In addition the derivative of the sigmoid is simply &#963; = &#963;(1-&#963;). The final output of the neuron, *a*, is shown below along with the &#963; function.
 
-<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\large&space;a = \sigma(z), \;\;\;  \sigma(z) = \frac{1}{1+e^{-z}}" title="eq_2" /></p>
+<figure>
+<span class="image fit">
+        <img src="{{ "/images/eq02.png" | absolute_url }}" alt=""/>
+</span>
+</figure>
 
 The cost function can be defined as the square of the difference between *a* and the true value *y* as shown below:
 
-<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\large&space;C = (y-a)^2" title="eq_2" /></p>
+<figure>
+<span class="image fit">
+        <img src="{{ "/images/eq03.png" | absolute_url }}" alt=""/>
+</span>
+</figure>
+
 
 As discussed above, our approach to optimize this neuron is to find the gradient of the cost function with respect to the weights and bias and step in the opposite direction of this gradient. The gradient is derived via the chain rule as shown below:
 
-<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\large&space;\frac{\partial C}{\partial w_1} = \frac{\partial C}{\partial a}\frac{\partial a}{\partial z}\frac{\partial z}{\partial w_1} = (y-a)\sigma'(z)x_1 " title="eq_2" /></p>
-
-<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\large&space;\frac{\partial C}{\partial w_2} = \frac{\partial C}{\partial a}\frac{\partial a}{\partial z}\frac{\partial z}{\partial w_2} = (y-a)\sigma'(z)x_2 " title="eq_2" /></p>
-
-<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\large&space;\frac{\partial C}{\partial b} = \frac{\partial C}{\partial a}\frac{\partial a}{\partial z}\frac{\partial z}{\partial b} = (y-a)\sigma'(z) " title="eq_2" /></p>
-
+<figure>
+<span class="image fit">
+        <img src="{{ "/images/eq04.png" | absolute_url }}" alt=""/>
+</span>
+</figure>
 
 Once we have found the gradient, we want to step in the opposite direction of the gradient by some step size which is defined by the learning rate &#951;.
 
