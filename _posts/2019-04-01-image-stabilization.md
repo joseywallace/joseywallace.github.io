@@ -5,10 +5,10 @@ date:   2019-04-01
 excerpt: "Stabilizing shaky video via parametric image alignment and Guassian smoothing"
 image: "/images/2019-04-01_cover.png"
 ---
-This tutorial demonstrates the process of image stabilization in python using the OpenCV library. The code for this demonstration, including several helper functions used to plot and visualize the transformation can be foudn on my github page below. The image stabilizaation pipeline involves three main steps -- (1) determining the original path of the camera, (2) smoothing this path, and (3) applying the smoothed path to the image set. 
+This tutorial demonstrates the process of image stabilization in python using the OpenCV library. The code for this demonstration, including several helper functions used to plot and visualize the transformation can be found on my github page below. The image stabilizaation pipeline involves three main steps -- (1) determining the original path of the camera, (2) smoothing this path, and (3) applying the smoothed path to the image set. 
 
 ## Finding the Camera's Path
-The camera’s path can be determined by finding the warp matrix from one image to the next in the series. This matrix allows us to transform or map from the one camera coordinate system to another. The first step in determining this matrix, is deciding on a suitable model for the geometric transformation from one frame to the next. The most common choices are either affine or pure translation, however, other methods rely on projective transformation (homography) or even non-linear transformations. In this tutorial, we will assume Euclidean motion and use the following transformation:
+The camera’s path can be determined by finding the warp matrix from one image to the next in the series. This matrix allows us to transform or map from one camera coordinate system to another. The first step in determining this matrix, is deciding on a suitable model for the geometric transformation from one frame to the next. The most common choices are either affine or pure translation, however, other methods rely on projective transformation (homography) or even non-linear transformations. In this tutorial, we will assume Euclidean motion and use the following transformation:
 <br><br/>
 
 <figure>
@@ -214,6 +214,8 @@ In both cases I reused the same sigma matrix as used above in Fig. 5. Both video
 
 [3] <a href="https://ai.googleblog.com/2011/06/auto-directed-video-stabilization-with.html"> Google AI Blog: Auto-Directed Video Stabilization with Robust L1 Optimal Camera Paths"</a>
 
-[4] <a href="https://www.learnopencv.com/video-stabilization-using-point-feature-matching-in-opencv/">Learn OpenCV: Video Stabilization Using Point Feature Matching in OpenCV"</a>
+[4] <a href="https://www.learnopencv.com/video-stabilization-using-point-feature-matching-in-opencv/">Learn OpenCV: Video Stabilization Using Point Feature Matching in OpenCV</a>
+
+[5] <a href="https://github.com/joseywallace/video_stabilization"> Github code for this blog post</a>
 
 *__Note: This code was originally written in partial fulfillment of Georgia Tech's CS6475 (Computational Photography)__*.
