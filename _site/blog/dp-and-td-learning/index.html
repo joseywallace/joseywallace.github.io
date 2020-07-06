@@ -1,0 +1,385 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+  Jekyll integration by somiibo.com
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+--><html>
+	<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+<title>Dynamic programming and Temporal difference learning from scratch</title>
+<meta name="description" content="">
+
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icon/favicon-16x16.png">
+<link rel="manifest" href="/assets/icon/manifest.json">
+<link rel="mask-icon" href="/assets/icon/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="/assets/icon/favicon.ico">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/v4-shims.css">
+<meta name="msapplication-config" content="/assets/icon/browserconfig.xml">
+<meta name="theme-color" content="#ffffff">
+
+<!-- CSS -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<noscript><link rel="stylesheet" href="/assets/css/noscript.css"></noscript>
+
+	</head>
+	<body class="is-loading">
+
+		<!-- Wrapper -->
+			<div id="wrapper" class="fade-in">
+
+				<!-- Header -->
+        <header id="header">
+          <a href="/" class="logo">Joseph Wallace</a>
+        </header>
+
+				<!-- Nav -->
+					<nav id="nav">
+
+            <ul class="links">
+  <li class=""><a href="/">Home</a></li>
+  <li class=" active "><a href="/blog/">Blog</a></li>
+  <li class=""><a href="/cv/">Curriculum Vitae</a></li>
+</ul>
+
+
+						<ul class="icons">
+              <li><a href="https://linkedin.com/in/joseph-b-wallace/" class="icon fa-linkedin" rel="nofollow"><span class="label">LinkedIn</span></a></li>
+              <li><a href="https://researchgate.net/profile/Joseph_Wallace5" class="fab fa-researchgate" rel="nofollow"><span class="label"></span></a></li>
+              <li><a href="https://github.com/joseywallace" class="icon fa-github" rel="nofollow"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+				<div id="main">
+          <section class="post">
+    				<header class="major">
+      				<span class="date">06 Apr 2020</span>
+      				<h1>Dynamic programming and Temporal difference learning from scratch</h1>
+      				<p>Implementation of the three foundational dynamic programming and temporal difference learning methods in python</p>
+      			</header>
+      			<div class="image main"><img src="/images/2020-04-15-logo.png" alt=""></div>
+      			<p></p>
+<p>In this blog post we apply value iteration, policy iteration, and q tabulation to solve the frozen lake problem. Value and policy iteration are dynamic programming algorithms that can be used to determine the optimal policy given a perfect model of the environment. Such algorithms are of limited practical utility in Reinforcement Learning (RL) due to their restriction of requiring a perfect model of the environment. However, many of the fundamental RL algorithms are based on these DP algorithms. The third algorithm implemented in this post is the well-known off-policy temporal difference learning algorithm known as Q-learning. In contrast with the DP algorithms, Q-learning doesn’t require a model of the environment and hence can be trained directly from raw experience (similar to Monte Carlo methods). However, like the DP algorithms, Q-learning updates its estimates on the fly without waiting to see the final outcome.</p>
+
+<h3 id="creating-the-environment">Creating the Environment</h3>
+<p>In this section we create the forzen lake environement. The frozen lake environment is meant to model a robot trying to quickly cross a frozen lake. There are multiple holes in the ice, which the robot will fall into if it tries to pass over. The lake is modeled by a numpy array (shown below) where the zeros represents solid ice and ones represents a hole in the ice. The robot starts at the upper right corner (0,0) and must find its way to the lower left corner (5,5). There are four available actions; up, right, left, and down. At each step, there is an 80% chance the robot will go the intended direction and a 20% chance that the robot will go either left or right of the intended direction. Each step incurs a -0.1 reward. Falling into the ice ends the episode with a -1 reward. Reaching the goal ends the episode with a +1 reward.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="n">SMALL_LAKE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
+                       <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+<span class="n">STEP_COST</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
+<span class="k">class</span> <span class="nc">FrozenLake</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lake</span> <span class="o">=</span> <span class="n">SMALL_LAKE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">d</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake</span><span class="o">.</span><span class="n">shape</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span> <span class="c">#up, right, down, left
+</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translation</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_space</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lake</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="p">),</span> <span class="s">"action "</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">action</span><span class="p">)</span><span class="o">+</span><span class="s">" not in action space"</span>
+        <span class="n">reward</span> <span class="o">=</span> <span class="n">STEP_COST</span>
+        <span class="n">rnd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">rnd</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span> <span class="n">action</span> <span class="o">=</span> <span class="p">(</span><span class="n">action</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">elif</span> <span class="n">rnd</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">:</span> <span class="n">action</span> <span class="o">=</span> <span class="p">(</span><span class="n">action</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">new_state</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">[</span><span class="n">action</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">((</span><span class="n">new_state</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">new_state</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake</span><span class="o">.</span><span class="n">shape</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">new_state</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lake</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c"># fall into hole
+</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">reward</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">goal</span><span class="p">):</span> <span class="c"># goal reached
+</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">reward</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">),</span> <span class="n">reward</span><span class="p">,</span> <span class="bp">False</span>
+    <span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">)</span></code></pre></figure>
+
+<p>The two main functions of the environment that the agent will use are the <em>reset</em> and <em>step</em> functions. The reset function moves the robot back to the start position and the step function accepts an action and returns the resulting state, reward, and boolean describing if the episode has ended.</p>
+
+<h3 id="policy-iteration">Policy Iteration</h3>
+
+<h3 id="value-iteration">Value Iteration</h3>
+
+<p>As mentioned above, value iteration is a DP algorithm for determining the optimal policy given a perfect model of the environment. The algorithm</p>
+
+<p>In this post I go through the mathematics behind neural networks and demonstrate how to implement a neural network in python from scratch. First, I’ll introduce the simple example of a single neuron with a sigmoid activation function. The neuron is the fundamental unit from which neural networks are designed. The single neuron model is used to introduce the concepts of gradient descent and back propagation before applying these concepts to the more complicated neural network.</p>
+
+<p>The perceptron, which was the precursor to the sigmoid neuron was invented by Frank Rosenblatt in the 1950s and 60s. The concept of the perceptron, which is biologically inspired, takes the sum of multiple weighted inputs and compares this sum to some threshold value. If the value is greater than the threshold, the neuron ‘fires’ creating an output of unity. Otherwise, the neuron outputs zero. Neurons can be programmed by adjusting their weights and biases, to simulate ‘and’, ‘or’, and ‘nand’ gates. Multiple neurons can be strung together to form literally any logic circuit imaginable. If we can then string multiple of these neurons together in layers and somehow optimize the system towards a particular solution to a problem, then we have an algorithm for designing complex possibly non-intuitive circuits that given some input can produce the desired output. That’s a huge if.. It’s truly amazing that such a technique exist. The two key components that make up this optimization technique are back propagation and stochastic gradient descent. Both are actually fairly simple to understand requiring only an understanding of basic calculus. Gradient defines the method by which we seek to minimize the cost function and hence the error in our model. Back propagation is a technique for optimizing the influence of a each weight and biases on the cost function.</p>
+
+<p>The figure below shows the simple single neuron model with two inputs and a single output.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/node.png" alt="">
+        <figcaption><b>Figure 1.</b> Single neuron model with two inputs.</figcaption>
+</span>
+</figure>
+
+<p>It is useful to define <em>z</em> as shown below:</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq01.png" alt="">
+</span>
+</figure>
+
+<p>Where <em>w<sub>k</sub></em> are the weights, <em>x<sub>k</sub></em> are the input values, and <em>b</em> is the bias. The <em>z</em> function, known as the weighted input to the neuron, is passed through a non-linearity function in this example a sigmoid. The sigmoid function allows us to optimize the weights and biases much more easily since as opposed to the perceptron model discussed above, the sigmoid is continuous. In addition the derivative of the sigmoid is simply σ = σ(1-σ). The final output of the neuron, <em>a</em>, is shown below along with the σ function.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq02.png" alt="">
+</span>
+</figure>
+
+<p>The cost function can be defined as the square of the difference between <em>a</em> and the true value <em>y</em> as shown below:</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq03.png" alt="">
+</span>
+</figure>
+
+<p>As discussed above, our approach to optimize this neuron is to find the gradient of the cost function with respect to the weights and bias and step in the opposite direction of this gradient. The gradient is derived via the chain rule as shown below:</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq04.png" alt="">
+</span>
+</figure>
+
+<p>Once we have found the gradient, we want to step in the opposite direction of the gradient by some step size which is defined by the learning rate η.</p>
+
+<p>Let’s put this all together in python now. The Neuron class shown below is initialized by passing in the number of epochs (training steps over the entire dataset), eta (learning rate), and dim (length of input vector X).</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="k">class</span> <span class="nc">Neuron</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">eta</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="n">eta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span><span class="o">*</span><span class="n">dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">del_w</span> <span class="o">=</span>  <span class="n">del_b</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">xt</span><span class="p">,</span> <span class="n">yt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xt</span><span class="p">)</span>
+                <span class="n">sigz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+                <span class="n">delC</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">yt</span> <span class="o">-</span> <span class="n">sigz</span><span class="p">)</span><span class="o">*</span><span class="n">sigz</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">sigz</span><span class="p">)</span>
+                <span class="n">del_w</span> <span class="o">+=</span> <span class="n">delC</span><span class="o">*</span><span class="n">xt</span>
+                <span class="n">del_b</span> <span class="o">+=</span> <span class="n">delC</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eta</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="n">del_b</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eta</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="n">del_w</span>
+    <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">))</span></code></pre></figure>
+
+<p>The single neuron acts as a linear separator and hence we can test the Neuron class on the data set created below:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">x</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mf">1.5</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">0.4</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="n">Neuron</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1500</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">n</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">n</span><span class="o">.</span><span class="n">sigma</span><span class="p">(</span><span class="n">z</span><span class="p">))</span></code></pre></figure>
+
+<figure>
+<span class="image fit">
+        <img src="/images/neuron_data.png" alt="">
+        <figcaption><b>Figure 2.</b> (left) raw data color coded by label and (right) predictions made by the single neuron model after training.</figcaption>
+</span>
+</figure>
+
+<ol>
+  <li>Partition the data into minibatches</li>
+  <li>Calculate the gradient of the cost function via back propagation</li>
+  <li>Calculate the step based on learning rate and gradient</li>
+  <li>Apply a step change to weights and biases</li>
+  <li>Rinse and repeat for each minibatch for n epochs</li>
+</ol>
+
+<p>We can break this into two functions (1) stochastic gradient descent (sgd) and (2) backpropagation. The sgd method is responsible for all of the above steps except 3, which the back propagation method handles. The code for the sgd method is shown below. The method loops over though the data <em>epochs</em> number of times, shuffling the data and creating new minibatches at each epoch. Then, the code loops through each minibatch and each instance within each minibatch creating three nested for loops. The runtime is <em>O(epochs*len(x))</em>.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python">    <span class="k">def</span> <span class="nf">sgd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">x_test</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">y_test</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">xr</span><span class="p">,</span> <span class="n">yr</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">minibatches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">xr</span><span class="p">[</span><span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">batch_size</span><span class="p">],</span> <span class="n">yr</span><span class="p">[</span><span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">batch_size</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">batch_size</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">xm</span><span class="p">,</span> <span class="n">ym</span> <span class="ow">in</span> <span class="n">minibatches</span><span class="p">:</span>
+                <span class="n">grad_w</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">]</span>
+                <span class="n">grad_b</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xm</span><span class="p">,</span> <span class="n">ym</span><span class="p">):</span>
+                    <span class="n">d_grad_w</span><span class="p">,</span> <span class="n">d_grad_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backpropagate</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">)</span>
+                    <span class="n">grad_w</span> <span class="o">=</span> <span class="p">[</span><span class="n">dw</span><span class="o">+</span><span class="n">w</span> <span class="k">for</span> <span class="n">dw</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">d_grad_w</span><span class="p">,</span> <span class="n">grad_w</span><span class="p">)]</span>
+                    <span class="n">grad_b</span> <span class="o">=</span> <span class="p">[</span><span class="n">db</span><span class="o">+</span><span class="n">b</span> <span class="k">for</span> <span class="n">db</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">d_grad_b</span><span class="p">,</span> <span class="n">grad_b</span><span class="p">)]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span><span class="o">-</span><span class="n">eta</span><span class="o">*</span><span class="p">(</span><span class="n">dw</span><span class="o">/</span><span class="n">xm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">dw</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">grad_w</span><span class="p">)]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="o">-</span><span class="n">eta</span><span class="o">*</span><span class="p">(</span><span class="n">db</span><span class="o">/</span><span class="n">xm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">db</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">grad_b</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">x_test</span> <span class="ow">and</span> <span class="n">y_test</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">'Epoch:'</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="s">'Score:'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">),</span> <span class="s">'</span><span class="si">%</span><span class="s">'</span><span class="p">)</span></code></pre></figure>
+
+<p>The next function is backpropagation. This function first takes in a single training instance and returns the weight and bias gradients for that instance. First, the function performs a forward pass through the network, collecting the <em>z</em> and <em>a</em> values along the way. Then, the δ, <em>w</em>, and <em>b</em> are calculated for the last layer in the network (this layer is calculated differently than the rest of the layers due to the cost function). Next, the δ, <em>w</em>, and <em>b</em> for each subsequent layer working back towards the input of the neural network are calculated using an iterative dynamic programming approach. Finally, the resulting gradient of <em>w</em> and <em>b</em> is returned.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python">    <span class="k">def</span> <span class="nf">backpropagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">grad_w</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">]</span>
+        <span class="n">grad_b</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">]</span>
+        <span class="c">#forward pass to calculate the 'z' and 'a' values
+</span>
+        <span class="n">a_vals</span><span class="p">,</span> <span class="n">z_vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">):</span>
+            <span class="n">z_vals</span> <span class="o">+=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">a_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">b</span><span class="p">]</span>
+            <span class="n">a_vals</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">z_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="c">#backward pass propagating errors through the network
+</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">a_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sig_prime</span><span class="p">(</span><span class="n">z_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">grad_w</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">a_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">grad_b</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span><span class="o">*</span><span class="n">sig_prime</span><span class="p">(</span><span class="n">z_vals</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="p">])</span>
+            <span class="n">grad_w</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">a_vals</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">grad_b</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="k">return</span> <span class="n">grad_w</span><span class="p">,</span> <span class="n">grad_b</span> </code></pre></figure>
+
+<p>As a quick validation, we can test a neural networks ability to fit non-linearly-separable data. Figure 5 below shows the result of fitting a neural network with sizes = (2,3,2) to a data set where all labels within a given radius are classified as 1 and all outside the radius are classified as 0.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/mlp_data.png" alt="">
+        <figcaption><b>Figure 4.</b> (left) Raw data created to test the neural network and (right) results of training a neural network with layer sizes (2,3,2) on the left data. The neural network performs decently well only missing a few instances. </figcaption>
+</span>
+</figure>
+
+<h3 id="resources-and-additional-reading">Resources and Additional Reading</h3>
+
+<p>[1] <a href="http://neuralnetworksanddeeplearning.com/">Neural networks and Deep Learning by Michael Nielsen, Dec. 2019</a></p>
+
+<p>[2] <a href="https://www.youtube.com/watch?v=aircAruvnKk&amp;t=832s">3Blue1Brown youtube series on neural networks</a></p>
+
+<p>[3] <a href="https://github.com/joseywallace?tab=repositories">Code repository for this blog post</a></p>
+
+      		</section>
+
+          <div class="comments-wrapper">
+          <div id="disqus_thread"></div>
+          <script>
+              /**
+               *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+               *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+               */
+
+              var disqus_config = function () {
+                  this.page.url = '/blog/dp-and-td-learning/';  /*Replace PAGE_URL with your page's canonical URL variable*/
+                  this.page.identifier = '/blog/dp-and-td-learning/'; /*Replace PAGE_IDENTIFIER with your page's unique identifier variable*/
+              };
+
+              (function() {  /* dont endit below this line */
+                  var d = document, s = d.createElement('script');
+
+                  s.src = 'https://joseywallace.github.io.disqus.com/embed.js';
+
+                  s.setAttribute('data-timestamp', +new Date());
+                  (d.head || d.body).appendChild(s);
+              })();
+          </script>
+          <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+</noscript>
+        </div>
+<!-- /.comments-wrapper -->
+
+
+					<!-- Footer -->
+						<footer>
+              <ul class="actions">
+                <li><a href="/blog/" class="button">The Blog</a></li>
+              </ul>
+						</footer>
+					</div>
+
+				<!-- Footer -->
+        <footer id="footer">
+  <section>
+    <form method="POST" action="https://formspree.io/Josey.Wallace@gmail.com">
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name">
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="text" name="email" id="email">
+      </div>
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea name="message" id="message" rows="3"></textarea>
+      </div>
+      <ul class="actions">
+        <li><input type="submit" value="Send Message"></li>
+      </ul>
+    </form>
+  </section>
+  <section class="split contact">
+    <section class="alt">
+      <h3>Location</h3>
+      <p>Silicon Valley, CA</p>
+    </section>
+    <section>
+      <h3>Social</h3>
+      <ul class="icons alt">
+        
+        <li><a href="https://www.linkedin.com/" class="icon fa-linkedin" rel="nofollow"><span class="label">LinkedIn</span></a></li>
+        <li><a href="https://researchgate.net/profile/Joseph_Wallace5" class="fab fa-researchgate" rel="nofollow"><span class="label"></span></a></li>
+        <li><a href="https://github.com/default" class="icon fa-github" rel="nofollow"><span class="label">GitHub</span></a></li>
+      </ul>
+    </section>
+  </section>
+</footer>
+<!-- Copyright -->
+<div id="copyright">
+  <ul>
+<li>© HTML5 UP</li>
+<li>Design by <a href="https://html5up.net" rel="nofollow">HTML5 UP</a>
+</li>
+<li>Jekyll Integration by <a href="https://soundgrail.com">SoundGrail</a>
+</li>
+</ul>
+</div>
+
+
+			</div>
+
+      <!-- Scripts -->
+  		<!-- DYN -->
+<script src="/assets/js/jquery.min.js"></script>
+<script src="/assets/js/jquery.scrollex.min.js"></script>
+<script src="/assets/js/jquery.scrolly.min.js"></script>
+<script src="/assets/js/skel.min.js"></script>
+<script src="/assets/js/util.js"></script>
+<script src="/assets/js/main.js"></script>
+
+			<script async src="https://www.googletagmanager.com/gtag/js?id=default"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments)};
+  gtag('js', new Date());
+
+  gtag('config', 'default');
+</script>
+
+
+	</body>
+</html>

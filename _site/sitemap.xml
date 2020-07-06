@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+    <url>
+      <loc>https://joseywallace.github.io/blog/dp-and-td-learning/</loc>
+      
+        <lastmod>2020-04-06T00:00:00-07:00</lastmod>
+      
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/blog/neural-networks-from-scratch/</loc>
+      
+        <lastmod>2020-03-22T00:00:00-07:00</lastmod>
+      
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/blog/reinforcement-learning-on-atari-river-raid/</loc>
+      
+        <lastmod>2020-03-05T00:00:00-08:00</lastmod>
+      
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/blog/cascade-density/</loc>
+      
+        <lastmod>2019-12-01T00:00:00-08:00</lastmod>
+      
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/blog/image-stabilization/</loc>
+      
+        <lastmod>2019-04-01T00:00:00-07:00</lastmod>
+      
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/blog/bayesian-hierarchical-linear-regression/</loc>
+      
+        <lastmod>2018-09-01T00:00:00-07:00</lastmod>
+      
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/blog/bayesian-linear-regression/</loc>
+      
+        <lastmod>2018-08-02T00:00:00-07:00</lastmod>
+      
+      <changefreq>weekly</changefreq>
+      <priority>0.7</priority>
+    </url>
+  
+  
+    <url>
+      <loc>https://joseywallace.github.io/about/</loc>
+       <lastmod>2018-08-02T00:00:00-07:00</lastmod>
+      
+       <changefreq>weekly</changefreq>
+      
+       <priority>0.7</priority>
+      
+     </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/blog/</loc>
+       <lastmod>2017-11-02T00:00:00-07:00</lastmod>
+      
+       <changefreq>weekly</changefreq>
+      
+       <priority>1.0</priority>
+      
+     </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/cv/</loc>
+       <lastmod>2018-08-02T00:00:00-07:00</lastmod>
+      
+       <changefreq>weekly</changefreq>
+      
+       <priority>0.7</priority>
+      
+     </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/elements/</loc>
+       <lastmod>2017-11-02T00:00:00-07:00</lastmod>
+      
+       <changefreq>weekly</changefreq>
+      
+       <priority>0.7</priority>
+      
+     </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/</loc>
+       <lastmod>2017-11-02T00:00:00-07:00</lastmod>
+      
+       <changefreq>weekly</changefreq>
+      
+       <priority>1.0</priority>
+      
+     </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/sitemap.xml</loc>
+       <lastmod>2017-11-10T00:20:35+00:00</lastmod>
+      
+       <changefreq>weekly</changefreq>
+      
+       <priority>0.5</priority>
+      
+     </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/feed.xml</loc>
+       <lastmod>2017-11-10T00:20:35+00:00</lastmod>
+      
+       <changefreq>weekly</changefreq>
+      
+       <priority>0.5</priority>
+      
+     </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/feed.xslt.xml</loc>
+       <lastmod>2017-11-10T00:20:35+00:00</lastmod>
+      
+       <changefreq>weekly</changefreq>
+      
+       <priority>0.5</priority>
+      
+     </url>
+  
+    <url>
+      <loc>https://joseywallace.github.io/blog/page2/</loc>
+       <lastmod>2017-11-02T00:00:00-07:00</lastmod>
+      
+       <changefreq>weekly</changefreq>
+      
+       <priority>1.0</priority>
+      
+     </url>
+  
+</urlset>

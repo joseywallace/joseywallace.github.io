@@ -1,0 +1,213 @@
+<p>When an energetic ion enters a crystalline solid, the ion can collide with atoms in the lattice which are then displaced and go on to produce additional collisions. This proces continues along the path of the ion create a so-called cascade of defects. Modeling such cascades can reveal unique properties of the ion-solid interaction process such as the cascade density. The effect of cascade density on radiation defect dynamics is studied in detail in the paper “Deterministic Role of Collision Cascade Density in Radiation Defect Dynamics in Si”.</p>
+
+<p>This blog post walks through the method used to determine the cascade density in the paper mentioned above using a combination of the TRansport of Ions in Matter (TRIM) software [1], Open Visualization Tool (OVITO) [2], and python. The cascade densities are calculated using a method similar to that proposed by Heinisch and Singh [3] in which the cascade density is defined as the average local density of vacancies within some averaging radius.</p>
+
+<p>The following outline the steps necessary to calculating the cascade density.</p>
+
+<h2 id="setting-up-your-environment">Setting up your environment</h2>
+<h3 id="trim">TRIM</h3>
+<p>First download SRIM/TRIM software which is freely available <a href="http://www.srim.org/SRIM/SRIMLEGL.htm">here</a>. Once installed, you can open a TRIM simulation, select the ion parameters you wish to use, then select “Detailed Calculation with full Damage Cascade” from the drop down DAMAGE menu, and check the Collision Details box under Outpout Disk Files. The configuration used in this post is shown below.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/srim.png" alt="" />
+        <figcaption><b>Figure 1.</b> The SRIM terminal configuration used for computing the cascade densities in this post.</figcaption>
+</span>
+</figure>
+
+<h3 id="ovito">OVITO</h3>
+
+<p>Next, the OVITO library needs to be installed. As mentioned above OVITO is a tool for visual representation of atomic data. However, I’ve found that it has very nice (and efficient) implementations of coordination analysis methods and surface mesh / volume calculation via Delaunay tessellation. The library is installed via:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">pip</span> <span class="n">install</span> <span class="n">ovito</span></code></pre></figure>
+
+<h2 id="importing-trim-results-into-python">Importing TRIM results into python</h2>
+
+<p>Now that the environment is setup, we can move towards performing an actual simulation. After running TRIM with the settings specified above, an output file should be created in the SRIM Outputs directory. This file keeps track of the collision events positions, energy, recoil energy, etc., but is not easy to import and use for analysis in its current form. The script below parses the file and output the results as a pandas dataframe:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="k">def</span> <span class="nf">parse_trim_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">ion_count</span><span class="o">=</span><span class="mf">1e9</span><span class="p">):</span>
+    <span class="s">"""
+    Input::
+      filename: filename/path [str]
+      ion_count: number of ions [int]
+    Output::
+      pandas dataframe containing ions 1 to ion_count
+    """</span>
+    <span class="n">fh</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">'r'</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">'ISO-8859-1'</span><span class="p">)</span>
+    <span class="n">cascades</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="n">cascades_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    <span class="n">recoil</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">atom</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">vac</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">repl</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ion</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cascades</span><span class="p">[</span><span class="mi">26</span><span class="p">:]:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">'Recoil'</span><span class="p">):</span>
+                <span class="n">ion_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">ion_number</span> <span class="o">&gt;</span> <span class="n">ion_count</span><span class="p">:</span>
+                    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">'recoil'</span><span class="p">:</span><span class="n">recoil</span><span class="p">,</span> <span class="s">'atom'</span><span class="p">:</span><span class="n">atom</span><span class="p">,</span> <span class="s">'energy'</span><span class="p">:</span><span class="n">energy</span><span class="p">,</span>
+                       <span class="s">'x'</span><span class="p">:</span><span class="n">x</span><span class="p">,</span> <span class="s">'y'</span><span class="p">:</span><span class="n">y</span><span class="p">,</span> <span class="s">'z'</span><span class="p">:</span><span class="n">z</span><span class="p">,</span> <span class="s">'vac'</span><span class="p">:</span><span class="n">vac</span><span class="p">,</span> <span class="s">'repl'</span><span class="p">:</span><span class="n">repl</span><span class="p">,</span> <span class="s">'ion'</span><span class="p">:</span><span class="n">ion</span><span class="p">})</span>
+                    <span class="k">return</span> <span class="n">df</span>
+            <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">219</span><span class="p">):</span> <span class="c">#chr(219) character at start of every collision entry
+</span>
+                <span class="n">recoil</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                <span class="n">atom</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+                <span class="n">energy</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">])]</span>
+                <span class="n">x</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">])]</span>
+                <span class="n">y</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">5</span><span class="p">])]</span>
+                <span class="n">z</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">6</span><span class="p">])]</span>
+                <span class="n">vac</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">7</span><span class="p">])]</span>
+                <span class="n">repl</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">8</span><span class="p">])]</span>
+                <span class="n">ion</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ion_number</span><span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s">'recoil'</span><span class="p">:</span><span class="n">recoil</span><span class="p">,</span> <span class="s">'atom'</span><span class="p">:</span><span class="n">atom</span><span class="p">,</span> <span class="s">'energy'</span><span class="p">:</span><span class="n">energy</span><span class="p">,</span>
+                       <span class="s">'x'</span><span class="p">:</span><span class="n">x</span><span class="p">,</span> <span class="s">'y'</span><span class="p">:</span><span class="n">y</span><span class="p">,</span> <span class="s">'z'</span><span class="p">:</span><span class="n">z</span><span class="p">,</span> <span class="s">'vac'</span><span class="p">:</span><span class="n">vac</span><span class="p">,</span> <span class="s">'repl'</span><span class="p">:</span><span class="n">repl</span><span class="p">,</span> <span class="s">'ion'</span><span class="p">:</span><span class="n">ion</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">df</span></code></pre></figure>
+
+<h2 id="ovito-simulation-class">OVITO Simulation Class</h2>
+
+<p>In order to make importing new ion cascades easier, the following class has been created to interface with OVITO. The Class is initialized by passing the x,y,z positions of defects along with the yz-plane minimum and maximum dimensions.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">ovito</span> <span class="kn">as</span> <span class="nn">ov</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="k">class</span> <span class="nc">OvitoSimulation</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xyz</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yz_plane</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">cell_vec</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="s">"""
+        Input::
+            xyz (numpy array): x,y,z positions of defects of shape (n, 3) where n is the 
+                number of defects
+            yz_plane: ion collisions occur along the x-axis and the yz-plane defines the 
+                surface over which cascades are incident.
+        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">xyz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yz_plane</span> <span class="o">=</span> <span class="n">yz_plane</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_vec</span> <span class="o">=</span> <span class="n">cell_vec</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">xyz</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_node</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">create_node</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""
+        Create simulation cell
+        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_vec</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">cell</span> <span class="o">=</span> <span class="n">ov</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">SimulationCell</span><span class="p">()</span>
+            <span class="n">x_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">50</span>
+            <span class="n">xyz_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x_max</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yz_plane</span><span class="p">[</span><span class="mi">0</span><span class="p">,:][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">yz_plane</span><span class="p">[</span><span class="mi">0</span><span class="p">,:][</span><span class="mi">0</span><span class="p">]),</span> 
+                                <span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yz_plane</span><span class="p">[</span><span class="mi">1</span><span class="p">,:][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">yz_plane</span><span class="p">[</span><span class="mi">1</span><span class="p">,:][</span><span class="mi">0</span><span class="p">])])</span>
+            <span class="n">xyz_vec</span> <span class="o">=</span> <span class="n">xyz_max</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">origin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">25</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">yz_plane</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">.</span><span class="nb">min</span><span class="p">(),</span><span class="bp">self</span><span class="o">.</span><span class="n">yz_plane</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">.</span><span class="nb">min</span><span class="p">()]])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cell_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">xyz_vec</span><span class="p">,</span> <span class="n">origin</span><span class="o">.</span><span class="n">T</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">cell</span><span class="o">.</span><span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_vec</span>
+        <span class="n">cell</span><span class="o">.</span><span class="n">pbc</span> <span class="o">=</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">cell</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">line_width</span> <span class="o">=</span> <span class="mf">0.1</span>
+        
+        <span class="n">particles</span> <span class="o">=</span> <span class="n">ov</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Particles</span><span class="p">()</span>
+        <span class="n">particles</span><span class="o">.</span><span class="n">create_property</span><span class="p">(</span><span class="s">"Position"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xyz</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">ov</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataCollection</span><span class="p">(</span><span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">particles</span><span class="p">])</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">ov</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">(</span><span class="n">source</span> <span class="o">=</span> <span class="n">ov</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">StaticSource</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">coordination</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cutoff</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">200</span><span class="p">):</span>
+        <span class="s">"""
+        Counts the number of neighbors for each particle that are within a given cutoff range 
+        around its position.
+        Parameters::
+            cutoff (float): cutoff range to look for particles.
+            bins (int): number of bins to use when creating the radial distribution function.
+        """</span>
+        <span class="n">modifier</span> <span class="o">=</span> <span class="n">ov</span><span class="o">.</span><span class="n">modifiers</span><span class="o">.</span><span class="n">CoordinationNumberModifier</span><span class="p">(</span><span class="n">cutoff</span> <span class="o">=</span> <span class="n">cutoff</span><span class="p">,</span> 
+            <span class="n">number_of_bins</span> <span class="o">=</span> <span class="n">bins</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">modifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modifier</span><span class="p">)</span>
+        <span class="n">modifier</span> <span class="o">=</span> <span class="n">ov</span><span class="o">.</span><span class="n">modifiers</span><span class="o">.</span><span class="n">HistogramModifier</span><span class="p">(</span><span class="n">bin_count</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> 
+            <span class="n">particle_property</span><span class="o">=</span><span class="s">"Coordination"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">modifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modifier</span><span class="p">)</span>
+        <span class="n">coord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">compute</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">coord</span><span class="o">.</span><span class="n">series</span><span class="p">[</span><span class="s">'histogram[Coordination]'</span><span class="p">]</span><span class="o">.</span><span class="n">as_table</span><span class="p">()</span></code></pre></figure>
+
+<p>Finally, one last function is needed to rearrange the cascades from the TRIM data file as we see fit. For isolated cascade calculations you can set the simulation cell size to be much larger than the area occupied by cascades so that every cascade is essentially isolated. Of course this method can also be used to study the interaction of collision cascades.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">create_pulse</span><span class="p">(</span><span class="n">ion_df</span><span class="p">,</span> <span class="n">yz_plane</span><span class="p">):</span>
+    <span class="s">"""
+    ion_df = dataframe of ions
+    yz_plane = 2d np array containing min/max values (Ang)
+    """</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="p">(</span><span class="n">yz_plane</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">yz_plane</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="p">(</span><span class="n">yz_plane</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">yz_plane</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">num_ions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ion_df</span><span class="p">[</span><span class="s">'ion'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="n">ion_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">num_ions</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">ion_positions</span> <span class="o">=</span> <span class="n">yz_plane</span><span class="o">.</span><span class="nb">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="nb">abs</span><span class="p">(</span><span class="n">yz_plane</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">yz_plane</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="n">ion_positions</span>
+    <span class="n">ions</span> <span class="o">=</span> <span class="n">ion_df</span><span class="p">[</span><span class="s">'ion'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+    <span class="n">pulse</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">ion</span><span class="p">,</span> <span class="n">pos</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ions</span><span class="p">,</span><span class="n">ion_positions</span><span class="p">):</span>
+        <span class="n">ion_array</span> <span class="o">=</span> <span class="n">ion_df</span><span class="p">[</span><span class="n">ion_df</span><span class="p">[</span><span class="s">'ion'</span><span class="p">]</span> <span class="o">==</span> <span class="n">ion</span><span class="p">][[</span><span class="s">'x'</span><span class="p">,</span><span class="s">'y'</span><span class="p">,</span><span class="s">'z'</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">ion_array</span><span class="p">[[</span><span class="s">'y'</span><span class="p">,</span><span class="s">'z'</span><span class="p">]]</span> <span class="o">+=</span> <span class="n">pos</span>
+        <span class="n">pulse</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pulse</span><span class="p">,</span><span class="n">ion_array</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pulse</span><span class="p">[[</span><span class="s">'x'</span><span class="p">,</span><span class="s">'y'</span><span class="p">,</span><span class="s">'z'</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pulse</span></code></pre></figure>
+
+<h2 id="an-example">An Example</h2>
+
+<p>This section goes through an example using 500 keV Ar+ ions incident onto Si. The TRIM file created for this example had ~6000 ion cascades and was ~2.8 GB. The code below parses this file into a pandas dataframe in approximately 2 minutes on my Dell XPS13 laptop.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">ion_df</span> <span class="o">=</span> <span class="n">parse_trim_file</span><span class="p">(</span><span class="s">'./COLLISON_500keV_Ar_Si6000.txt'</span><span class="p">,</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">ion_df_slice</span> <span class="o">=</span> <span class="n">ion_df</span><span class="p">[(</span><span class="n">ion_df</span><span class="p">[</span><span class="s">'x'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">6000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ion_df</span><span class="p">[</span><span class="s">'x'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">4000</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></code></pre></figure>
+
+<p>The depth dependence of vacancies can be plotted as shown below:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">ion_df</span><span class="p">[</span><span class="s">'x'</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">stacked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Depth (Ang.)'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Count'</span><span class="p">)</span></code></pre></figure>
+
+<figure>
+<span class="image fit">
+        <img src="/images/vac_depth.png" alt="" />
+        <figcaption><b>Figure 2.</b> Plot of the vacancy probability density function (pdf) as a function of depth for 500 keV Ar+ ions incident into Si.</figcaption>
+</span>
+</figure>
+
+<p>Next we can calculate the local cascade density for each vacancy near the depth of maximum vacancy concentration. The cascade density is returned as a histogram across density values (plotted below in Fig. 4). The average cascade density for the averaging radius of 10 nm is calculated in the last line of the snippet below.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">ion_df_slice</span> <span class="o">=</span> <span class="n">ion_df</span><span class="p">[(</span><span class="n">ion_df</span><span class="p">[</span><span class="s">'x'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">6000</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ion_df</span><span class="p">[</span><span class="s">'x'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">4000</span><span class="p">)]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">xyz_ions</span> <span class="o">=</span> <span class="n">create_pulse</span><span class="p">(</span><span class="n">ion_df_slice</span><span class="p">,</span> <span class="n">yz_plane</span><span class="p">)</span>
+<span class="n">ions_ov</span> <span class="o">=</span> <span class="n">OvitoSimulation</span><span class="p">(</span><span class="n">xyz</span><span class="o">=</span><span class="n">xyz_ions</span><span class="p">,</span> <span class="n">yz_plane</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e6</span><span class="p">],[</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e6</span><span class="p">]]))</span>
+<span class="n">coord</span> <span class="o">=</span> <span class="n">ions_ov</span><span class="o">.</span><span class="n">coordination</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mf">4.</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">density</span> <span class="o">=</span> <span class="n">coord</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">density</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">/=</span> <span class="p">((</span><span class="mf">4.</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">density</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">density</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Density'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Count'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s">'Average cascade density is: '</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">density</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">density</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">density</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])))</span></code></pre></figure>
+
+<figure>
+<span class="image fit">
+        <img src="/images/cascade_histogram.png" alt="" />
+        <figcaption><b>Figure 3.</b> Histogram of local cascade density values calculated at the depth of 400 to 600 nm for each vacancy in the cascade. </figcaption>
+</span>
+</figure>
+
+<p>The average cascade density for an averaging radius of 10 nm is calculated in the last line of the snippet above as  0.0481 Vac./nm<sup>3</sup>.</p>
+
+<h3 id="resources-and-additional-reading">Resources and Additional Reading</h3>
+
+<p>[1] TRIM/SRIM software: http://www.srim.org/SRIM/SRIMLEGL.htm</p>
+
+<p>[2] OVITO software: https://www.ovito.org/</p>
+
+<p>[3] Heinisch, H. L. &amp; Singh, B. N. On the structure of irradiation-induced collision cascades in metals as a function of recoil energy and crystal structure. Phil. Mag. A 67, 407–424 (1993).</p>
+

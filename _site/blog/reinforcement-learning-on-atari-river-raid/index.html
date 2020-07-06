@@ -1,0 +1,335 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+  Jekyll integration by somiibo.com
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+--><html>
+	<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+<title>Reinforcement Learning with Atari River Raid</title>
+<meta name="description" content="">
+
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icon/favicon-16x16.png">
+<link rel="manifest" href="/assets/icon/manifest.json">
+<link rel="mask-icon" href="/assets/icon/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="/assets/icon/favicon.ico">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/v4-shims.css">
+<meta name="msapplication-config" content="/assets/icon/browserconfig.xml">
+<meta name="theme-color" content="#ffffff">
+
+<!-- CSS -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<noscript><link rel="stylesheet" href="/assets/css/noscript.css"></noscript>
+
+	</head>
+	<body class="is-loading">
+
+		<!-- Wrapper -->
+			<div id="wrapper" class="fade-in">
+
+				<!-- Header -->
+        <header id="header">
+          <a href="/" class="logo">Joseph Wallace</a>
+        </header>
+
+				<!-- Nav -->
+					<nav id="nav">
+
+            <ul class="links">
+  <li class=""><a href="/">Home</a></li>
+  <li class=" active "><a href="/blog/">Blog</a></li>
+  <li class=""><a href="/cv/">Curriculum Vitae</a></li>
+</ul>
+
+
+						<ul class="icons">
+              <li><a href="https://linkedin.com/in/joseph-b-wallace/" class="icon fa-linkedin" rel="nofollow"><span class="label">LinkedIn</span></a></li>
+              <li><a href="https://researchgate.net/profile/Joseph_Wallace5" class="fab fa-researchgate" rel="nofollow"><span class="label"></span></a></li>
+              <li><a href="https://github.com/joseywallace" class="icon fa-github" rel="nofollow"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+				<div id="main">
+          <section class="post">
+    				<header class="major">
+      				<span class="date">05 Mar 2020</span>
+      				<h1>Reinforcement Learning with Atari River Raid</h1>
+      				<p>Atari River Raid solved using deep Q-learning with OpenAI's Gym and PyTorch</p>
+      			</header>
+      			<div class="image main"><img src="/images/riverraid.png" alt=""></div>
+      			<p></p>
+<p>Atari games have become a test piece for new RL methods, in part due to the publication of “Human-level control through deep reinforcement learning”. Such games provide a challenging domain that is relatively easy to implement and also relatively easy to understand.</p>
+
+<p>This blog post focuses on finding a reinforcement learning solution to the Atari game River Raid, which is vertically scrolling shooter game developed by Activision in 1982. The player pilots a fighter jet over a river to conduct a raid behind enemy lines. The player can maneuver left or right,  accelerate or decelerate, and fire. Points are scored for every enemy shot down. The jet refuels when it flies over fuel depots (fuel depots can also be shot to gain points). The game ends when the fighter jet crashes into the river bank or an enemy craft, or runs out fuel. The fuel gauge is displayed at the bottom of the screen.</p>
+
+<h3 id="previous-work">Previous Work</h3>
+
+<p>In this blog post I replicate the seminal work by Mnih et. al [2015] which developed the deep Q-network bridging the divide between high-dimensional sensory data (eg 210x160 pixel Atari screen) and actions taken by an agent. They achieved this by using a convolutional neural network to map from the high-dimensional Atari input screen to the long-term discounted value for each possible action. Previously, training such a neural network was highly unstable or computationally too expensive to do on a large convolutional network. The key to properly training the neural network was in using two key concepts – experience replay and periodic updates via a target network. With these concepts, they achieved high performance across a set of 49 Atari games.</p>
+
+<p>Experience replay is a biologically inspired phenomenon that shuffles the data being fed to NN for back propagation. In this way, correlations created by sequential feeding data to the NN can be removed. Experience replay can also help to smooth over changes in the state-action-reward history.</p>
+
+<p>The second key method, periodic updating of a target network, helps to decouple the action-value pairs from the target network itself. In calculating Q(s,a) we use the next state Q(s’, a’). The states s and s’ will likely look very similar since they are only one step apart and hence it will be difficult for the neural network to distinguish them. So, by updating the NN at every step, Q(s,a) will influence our value for Q(s’,a’) and other similar states inadvertently and hence introduce instability to the training process. To prevent this the target network is only updated every n steps (where eg n = 1000).</p>
+
+<p>One more quick note before we jump into the code. There is an excellent implementation of this algorithm for Atari Pong given in <em>Deep Reinforcement Learning Hands-On</em> chapter 6 by Maxim Lapan. The source code can be found here. My implementation follows a similar outline.</p>
+
+<h3 id="image-preprocessing">Image Preprocessing</h3>
+
+<p>To decrease the time required to train the model and increase the model’s accuracy, several preprocessing steps are executed. The preprocessing steps are executed in the wrappers.py file and connected in the pipeline function as shown below:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">pipeline</span><span class="p">(</span><span class="n">env_name</span><span class="p">):</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">gym</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">env_name</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">FireOnReset</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">ResetOnEndLife</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">SkipFrames</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">GrayScale</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">Crop</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">163</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">160</span><span class="p">])</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">Dilate</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">Compress</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">Normalize</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">env</span></code></pre></figure>
+
+<p>I’ll quickly walk through the purpose of each function (the code for each function can be found in the github repo at the bottom of the page).</p>
+
+<ul>
+  <li>
+<strong>FireOnReset</strong> is used to push the fire button which starts the game. This helps speed up training and convergence as the Agent can become stuck at this position for many frames without firing.
+.ResetOnEndLife is used to split the game at each new life. The game starts with 3 lives.</li>
+  <li>
+<strong>SkipFrames</strong> is used to speed up training. The difference between one frame and then next is very small and a stable NN will likely choose the same action. To speed training, the Agent selects an action and the action is repeated for n steps (n = 4 in this case).</li>
+  <li>
+<strong>GrayScale</strong> (not GOT) is used to convert the RGB image input to a single channel gray scale image.</li>
+  <li>
+<strong>Crop</strong> is used to crop the image down to the provided indices.</li>
+  <li>
+<strong>Dilate</strong> is used to perform image dilation. This is very help in the case where objects on the Atari screen are too small relative to the size of the convolutional filter kernels.</li>
+  <li>
+<strong>Compress</strong> is used to compress the image to 84x84.</li>
+  <li>
+<strong>Normalize</strong> is used to renormalize the data from 0-256 to 0.0-1.0.</li>
+</ul>
+
+<p>Figure 1. shows (a) the unprocessed input image from Atari River Raid and (b)-(e) the processed image after passing through each step of the pipeline function.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/pipeline.png" alt="">
+        <figcaption><b>Figure 1.</b> Images at each stage of the image transformation through the pipeline outlined above. The final image state at (e) is what is used to train the deep Q network.</figcaption>
+</span>
+</figure>
+
+<p>The deep Q network is defined identical to what was used by Mnih et. al.  The input is a 84x84 image as shown below in Figure 1(b). This input image is fed through a 3 layer convolution neural network followed by two fully connected layers. The first convolution layer takes the single channel input image and produces 32 channels with a kernel size of 8 and stride of 4. The next convolutional layer takes the 32 channel input and outputs 64 channels after processing with a kernel of size 4 and stride 2. The final convolutional layer takes the 64 channel input and outputs 64 channels after processing with a kernel size of 3 and stride of 1. The neural network definition is similar to that used by [2].</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">DQN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">,</span> <span class="n">n_actions</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DQN</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">32</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">conv_out_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_conv_out</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">conv_out_size</span><span class="p">,</span> <span class="mi">512</span><span class="p">),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">512</span><span class="p">,</span> <span class="n">n_actions</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_get_conv_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">size</span><span class="p">()))</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">conv_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="p">(</span><span class="n">conv_out</span><span class="p">)</span></code></pre></figure>
+
+<p>The Agent is implemented in model.py and uses the epsilon-greedy approach to determine actions at any given step. The Agent is responsible for taking actions and appending the results to the experience buffer.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">Agent</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">exp_buffer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span> <span class="o">=</span> <span class="n">exp_buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_rewards</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">def</span> <span class="nf">play_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s">"cpu"</span><span class="p">):</span>
+        <span class="n">done_reward</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span>  <span class="n">epsilon</span><span class="p">:</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">state_v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">q_vals_v</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">state_v</span><span class="p">)</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="nb">max</span><span class="p">(</span><span class="n">q_vals_v</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">new_state</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">is_done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_rewards</span> <span class="o">+=</span> <span class="n">reward</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exp_buffer</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">is_done</span><span class="p">,</span> <span class="n">new_state</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">new_state</span>
+        <span class="k">if</span> <span class="n">is_done</span><span class="p">:</span>
+            <span class="n">done_reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_rewards</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reset</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">done_reward</span></code></pre></figure>
+
+<p>The training is executed in the main.py file which can be found in repository for the project. This file also contains methods to collect and plot the models progress. The model was trained using an Nvidia GeForce GTX 970. The smoothed reward as a function of frames observed is shown in Fig. 2 below.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/tensorflow.png" alt="">
+        <figcaption><b>Figure 2.</b> Reward achieved by the model as a function of the number of frames observed for the a deep Q agent training on the River Raid Atari game. </figcaption>
+</span>
+</figure>
+
+<p>The model appears to learn fairly quickly from ~400k to 700k and then begins to saturate after ~2 million frames observed. In addition, the variablity in acheived score (shown in light blue) appears to increase substaintially with increasing number of frames observed. The video below shows the sixteen epsiodes played by the final state of the model with an epislon of 0.03. This epsilon was chosen to simulate randomness since the Atari games are all deterministic. Such a low value of epsilon shouldn’t have an appreciable impact on the total reward.</p>
+
+<figure>
+<div class="video-responsive">
+    <iframe width="420" height="315" src="https://www.youtube.com/embed/Q5UtnhxYbW0" frameborder="0" allowfullscreen=""></iframe>
+</div>
+    <figcaption><b>Figure 3.</b> Video containing twelve episodes played by the final version of the agent with increasing score from left to right and top to bottom. The minimum score was 580 (upper left) and the maximum score was 3860 (lower right).</figcaption>
+</figure>
+
+<p>After about five rounds of river raid I was able to achieve a score similar to the maximum score observed from the model. The performance reported by Mnih et. al was ~8316 using all three lives. This score is slightly better than the score of ~6800 (across three lives) achieved in this report. The score of an expert player is reported by Mnih et al. to be ~13513. The difference in score between my agent and the one reported by Mnih et al. could be due to the fact that they rescaled the score to range from -1, 1 whereas I’m using the original score reported given by Atari. It could also be due to the length of time the models were allowed to train.</p>
+
+<h3 id="future-areas-to-explore">Future Areas to Explore</h3>
+
+<p>Watching the model train several times, I’ve noticed that the game seems to have trouble getting past certain points in the game. For example, when the agent encounters it’s first bridge or when the agent encounters a constriction in the river. These difficult points can be visualizzed by looking at the distribution of scores for a single life episode on the trained agent. This distribution is shown below in Fig. 4.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/hist.png" alt="">
+        <figcaption><b>Figure 4.</b> Histogram of the final scores achieved by running the agent with epsilon of 0.03 for a single life. </figcaption>
+</span>
+</figure>
+
+<p>Figure 4 shows 4 clear distributions labeled (a)-(d). Distribution (a) seems to correspond to the death before the first bridge by one of the small helicopters (likely hard for the agent to see in the compressed image). Distribution (B) seems to correspond to making it past the first bridge and past the first split in the river, but dying before the second bridge. Distribution (C) seems to have made it past the second bridge, but died before the third. Finally, distribution (D) has made it past the third bridge, but usually dies by running out of fuel.</p>
+
+<p>It would make sense if there were a way to more greatly weight or increase the importance of how the agent died. This might allow the agent to focus more on its weaknesses and hence improve training speed. One simple method for achieving this is select the images from the replay buffer acording to some probability distribution describing the importance of each training snap shot.</p>
+
+<h3 id="references">References</h3>
+
+<p>[1] Mnih, V., Kavukcuoglu, K., Silver, D. et al. <em>Human-level control through deep reinforcement learning.</em> Nature 518, 529–533 (2015). https://doi.org/10.1038/nature14236</p>
+
+<p>[2] Maxam Lapan, <em>Deep Reinforcement Learning Hands-On: Apply modern RL methods, with deep Q-networks, value iteration, policy gradients, TRPO, AlphaGo Zero and more.</em> Packt Publishing, Ch. 6 (2018).</p>
+
+<p>[3] https://github.com/joseywallace</p>
+
+
+      		</section>
+
+          <div class="comments-wrapper">
+          <div id="disqus_thread"></div>
+          <script>
+              /**
+               *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+               *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+               */
+
+              var disqus_config = function () {
+                  this.page.url = '/blog/reinforcement-learning-on-atari-river-raid/';  /*Replace PAGE_URL with your page's canonical URL variable*/
+                  this.page.identifier = '/blog/reinforcement-learning-on-atari-river-raid/'; /*Replace PAGE_IDENTIFIER with your page's unique identifier variable*/
+              };
+
+              (function() {  /* dont endit below this line */
+                  var d = document, s = d.createElement('script');
+
+                  s.src = 'https://joseywallace.github.io.disqus.com/embed.js';
+
+                  s.setAttribute('data-timestamp', +new Date());
+                  (d.head || d.body).appendChild(s);
+              })();
+          </script>
+          <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+</noscript>
+        </div>
+<!-- /.comments-wrapper -->
+
+
+					<!-- Footer -->
+						<footer>
+              <ul class="actions">
+                <li><a href="/blog/" class="button">The Blog</a></li>
+              </ul>
+						</footer>
+					</div>
+
+				<!-- Footer -->
+        <footer id="footer">
+  <section>
+    <form method="POST" action="https://formspree.io/Josey.Wallace@gmail.com">
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name">
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="text" name="email" id="email">
+      </div>
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea name="message" id="message" rows="3"></textarea>
+      </div>
+      <ul class="actions">
+        <li><input type="submit" value="Send Message"></li>
+      </ul>
+    </form>
+  </section>
+  <section class="split contact">
+    <section class="alt">
+      <h3>Location</h3>
+      <p>Silicon Valley, CA</p>
+    </section>
+    <section>
+      <h3>Social</h3>
+      <ul class="icons alt">
+        
+        <li><a href="https://www.linkedin.com/" class="icon fa-linkedin" rel="nofollow"><span class="label">LinkedIn</span></a></li>
+        <li><a href="https://researchgate.net/profile/Joseph_Wallace5" class="fab fa-researchgate" rel="nofollow"><span class="label"></span></a></li>
+        <li><a href="https://github.com/default" class="icon fa-github" rel="nofollow"><span class="label">GitHub</span></a></li>
+      </ul>
+    </section>
+  </section>
+</footer>
+<!-- Copyright -->
+<div id="copyright">
+  <ul>
+<li>© HTML5 UP</li>
+<li>Design by <a href="https://html5up.net" rel="nofollow">HTML5 UP</a>
+</li>
+<li>Jekyll Integration by <a href="https://soundgrail.com">SoundGrail</a>
+</li>
+</ul>
+</div>
+
+
+			</div>
+
+      <!-- Scripts -->
+  		<!-- DYN -->
+<script src="/assets/js/jquery.min.js"></script>
+<script src="/assets/js/jquery.scrollex.min.js"></script>
+<script src="/assets/js/jquery.scrolly.min.js"></script>
+<script src="/assets/js/skel.min.js"></script>
+<script src="/assets/js/util.js"></script>
+<script src="/assets/js/main.js"></script>
+
+			<script async src="https://www.googletagmanager.com/gtag/js?id=default"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments)};
+  gtag('js', new Date());
+
+  gtag('config', 'default');
+</script>
+
+
+	</body>
+</html>

@@ -1,0 +1,214 @@
+<p>In this post I go through the mathematics behind neural networks and demonstrate how to implement a neural network in python from scratch. First, I’ll introduce the simple example of a single neuron with a sigmoid activation function. The neuron is the fundamental unit from which neural networks are designed. The single neuron model is used to introduce the concepts of gradient descent and back propagation before applying these concepts to the more complicated neural network.</p>
+
+<p>The perceptron, which was the precursor to the sigmoid neuron was invented by Frank Rosenblatt in the 1950s and 60s. The concept of the perceptron, which is biologically inspired, takes the sum of multiple weighted inputs and compares this sum to some threshold value. If the value is greater than the threshold, the neuron ‘fires’ creating an output of unity. Otherwise, the neuron outputs zero. Neurons can be programmed by adjusting their weights and biases, to simulate ‘and’, ‘or’, and ‘nand’ gates. Multiple neurons can be strung together to form literally any logic circuit imaginable. If we can then string multiple of these neurons together in layers and somehow optimize the system towards a particular solution to a problem, then we have an algorithm for designing complex possibly non-intuitive circuits that given some input can produce the desired output. That’s a huge if.. It’s truly amazing that such a technique exist. The two key components that make up this optimization technique are back propagation and stochastic gradient descent. Both are actually fairly simple to understand requiring only an understanding of basic calculus. Gradient defines the method by which we seek to minimize the cost function and hence the error in our model. Back propagation is a technique for optimizing the influence of a each weight and biases on the cost function.</p>
+
+<p>The figure below shows the simple single neuron model with two inputs and a single output.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/node.png" alt="" />
+        <figcaption><b>Figure 1.</b> Single neuron model with two inputs.</figcaption>
+</span>
+</figure>
+
+<p>It is useful to define <em>z</em> as shown below:</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq01.png" alt="" />
+</span>
+</figure>
+
+<p>Where <em>w<sub>k</sub></em> are the weights, <em>x<sub>k</sub></em> are the input values, and <em>b</em> is the bias. The <em>z</em> function, known as the weighted input to the neuron, is passed through a non-linearity function in this example a sigmoid. The sigmoid function allows us to optimize the weights and biases much more easily since as opposed to the perceptron model discussed above, the sigmoid is continuous. In addition the derivative of the sigmoid is simply σ = σ(1-σ). The final output of the neuron, <em>a</em>, is shown below along with the σ function.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq02.png" alt="" />
+</span>
+</figure>
+
+<p>The cost function can be defined as the square of the difference between <em>a</em> and the true value <em>y</em> as shown below:</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq03.png" alt="" />
+</span>
+</figure>
+
+<p>As discussed above, our approach to optimize this neuron is to find the gradient of the cost function with respect to the weights and bias and step in the opposite direction of this gradient. The gradient is derived via the chain rule as shown below:</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq04.png" alt="" />
+</span>
+</figure>
+
+<p>Once we have found the gradient, we want to step in the opposite direction of the gradient by some step size which is defined by the learning rate η.</p>
+
+<p>Let’s put this all together in python now. The Neuron class shown below is initialized by passing in the number of epochs (training steps over the entire dataset), eta (learning rate), and dim (length of input vector X).</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="k">class</span> <span class="nc">Neuron</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">eta</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="n">eta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">]</span><span class="o">*</span><span class="n">dim</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">del_w</span> <span class="o">=</span>  <span class="n">del_b</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">xt</span><span class="p">,</span> <span class="n">yt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xt</span><span class="p">)</span>
+                <span class="n">sigz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+                <span class="n">delC</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">yt</span> <span class="o">-</span> <span class="n">sigz</span><span class="p">)</span><span class="o">*</span><span class="n">sigz</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">sigz</span><span class="p">)</span>
+                <span class="n">del_w</span> <span class="o">+=</span> <span class="n">delC</span><span class="o">*</span><span class="n">xt</span>
+                <span class="n">del_b</span> <span class="o">+=</span> <span class="n">delC</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eta</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="n">del_b</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eta</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="n">del_w</span>
+    <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">))</span></code></pre></figure>
+
+<p>The single neuron acts as a linear separator and hence we can test the Neuron class on the data set created below:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">x</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mf">1.5</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">0.4</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="n">Neuron</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1500</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">n</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">n</span><span class="o">.</span><span class="n">sigma</span><span class="p">(</span><span class="n">z</span><span class="p">))</span></code></pre></figure>
+
+<figure>
+<span class="image fit">
+        <img src="/images/neuron_data.png" alt="" />
+        <figcaption><b>Figure 2.</b> (left) raw data color coded by label and (right) predictions made by the single neuron model after training.</figcaption>
+</span>
+</figure>
+
+<p>As shown in Figure 2 above, the single neuron does a decent job of separating the data. If the data is not linearly separable, the neuron will not find an optimal solution. In this case, at least one hidden layer is required.</p>
+
+<p>Now that we have had a quick refresher on the concepts of gradient descent and back propagation on a simple single neuron model, let’s move to the more complex model shown below.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/mlp1.png" alt="" />
+        <figcaption><b>Figure 3.</b> Schematic of the neural network with two input nodes, a single hidden layer and two output nodes.</figcaption>
+</span>
+</figure>
+
+<p>This neural network is composed of a two neuron input layer, followed by a single two neuron hidden layer and finally, a two neuron output layer. I think this network is the simplest network were we can still get an idea of how to handle the multidimensional weight matrices and gradients. In the figure below, I have expanded the network to include a node for each operation. <em>z</em> nodes represent nodes in which the summation operation occurs, <em>a</em> nodes apply the nonlinearity function in this case a sigmoid, and <em>C</em> nodes apply the cost function.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/mlp2.png" alt="" />
+        <figcaption><b>Figure 4.</b> Schematic of the neural network expanded to allow each node to represent a particular function in the neural network. This will make following the partial derivatives through back propagation much easier.</figcaption>
+</span>
+</figure>
+
+<p>Weights for each connection are show in the figure. Note that the super script denotes the level within the neural network and the subscript, ij, denotes that the weight is going from node j to node i. It is indexed this way to keep consistency with the weight matrix as you will see shortly.</p>
+
+<p>With the neural network outlined as shown in Fig. 4, each connection represents a partial derivative, which when strung together make up the chain rule. For example, if you want to know the derivative of the cost function with respect to the weight w11, you start at node C1 and find the product of partial derivatives of the child node with respect to the parent node until you reach the node of interest. This process is shown below for the weights and biases at level L=2 in the network. Note that each derivative is color coded to match Fig. 4.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq2.png" alt="" />
+</span>
+</figure>
+
+<p>The δ terms defined in the right column of equations above are seen to repeat in all terms. Looking more closely we see that these δ terms are actually the error propagated backwards from through the cost and sigmoid functions. In other words, δ<sup>2</sup> is the vector of errors associated with the l<sup>th</sup> level of the neural network. The gradient of the cost function with respect to the weights can be condensed into a matrix form as shown above in the right columns of equations, where ⨀ represents the Hadamard product of the two matrices. In addition, the gradient of the cost function with respect to the bias is simply δ.</p>
+
+<p>The equations for the gradient of the cost function with respect to weights in level 1 of the neural network are shown below.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq3.png" alt="" />
+</span>
+</figure>
+
+<p>The main difference compared to gradient at level L=2 in the neural network is in that the weights can affect the cost function through two separate branches. Similar to the previous layer, we can define δ<sup>1</sup> (right column) for level L=1. δ<sup>2</sup> is defined in terms of δ<sup>2</sup> and hence can be rewritten as shown in the highlighted box above. This equation along with the other two in highlighted equations above make up the general approach for calculating the weights and biases iteratively starting at the output layer and moving back towards the input. These are the primary equations we will use in implementing the back propagation code.</p>
+
+<p>Now that we have derived the primary equations for back propagating the error through the network, let’s move on to the code. First, we will define the NeuralNet class init and feed forward:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="k">class</span> <span class="nc">NeuralNet</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sizes</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">sizes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sizes</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">sizes</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">sizes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sizes</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sizes</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">feed_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">):</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span></code></pre></figure>
+
+<p>In the init method, the weights and biases are defined as a lsit of numpy arrays, where the list index +1 represents the layer.</p>
+
+<p>The optimization technique can be broken up into the following task:</p>
+
+<ol>
+  <li>Partition the data into minibatches</li>
+  <li>Calculate the gradient of the cost function via back propagation</li>
+  <li>Calculate the step based on learning rate and gradient</li>
+  <li>Apply a step change to weights and biases</li>
+  <li>Rinse and repeat for each minibatch for n epochs</li>
+</ol>
+
+<p>We can break this into two functions (1) stochastic gradient descent (sgd) and (2) backpropagation. The sgd method is responsible for all of the above steps except 3, which the back propagation method handles. The code for the sgd method is shown below. The method loops over though the data <em>epochs</em> number of times, shuffling the data and creating new minibatches at each epoch. Then, the code loops through each minibatch and each instance within each minibatch creating three nested for loops. The runtime is <em>O(epochs*len(x))</em>.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python">    <span class="k">def</span> <span class="nf">sgd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">eta</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">x_test</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">y_test</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">xr</span><span class="p">,</span> <span class="n">yr</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">minibatches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">xr</span><span class="p">[</span><span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">batch_size</span><span class="p">],</span> <span class="n">yr</span><span class="p">[</span><span class="n">k</span><span class="p">:</span><span class="n">k</span><span class="o">+</span><span class="n">batch_size</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">batch_size</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">xm</span><span class="p">,</span> <span class="n">ym</span> <span class="ow">in</span> <span class="n">minibatches</span><span class="p">:</span>
+                <span class="n">grad_w</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">]</span>
+                <span class="n">grad_b</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xm</span><span class="p">,</span> <span class="n">ym</span><span class="p">):</span>
+                    <span class="n">d_grad_w</span><span class="p">,</span> <span class="n">d_grad_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backpropagate</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">)</span>
+                    <span class="n">grad_w</span> <span class="o">=</span> <span class="p">[</span><span class="n">dw</span><span class="o">+</span><span class="n">w</span> <span class="k">for</span> <span class="n">dw</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">d_grad_w</span><span class="p">,</span> <span class="n">grad_w</span><span class="p">)]</span>
+                    <span class="n">grad_b</span> <span class="o">=</span> <span class="p">[</span><span class="n">db</span><span class="o">+</span><span class="n">b</span> <span class="k">for</span> <span class="n">db</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">d_grad_b</span><span class="p">,</span> <span class="n">grad_b</span><span class="p">)]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span><span class="o">-</span><span class="n">eta</span><span class="o">*</span><span class="p">(</span><span class="n">dw</span><span class="o">/</span><span class="n">xm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">dw</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">grad_w</span><span class="p">)]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="o">-</span><span class="n">eta</span><span class="o">*</span><span class="p">(</span><span class="n">db</span><span class="o">/</span><span class="n">xm</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">db</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">grad_b</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">x_test</span> <span class="ow">and</span> <span class="n">y_test</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">'Epoch:'</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="s">'Score:'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">),</span> <span class="s">'</span><span class="si">%</span><span class="s">'</span><span class="p">)</span></code></pre></figure>
+
+<p>The next function is backpropagation. This function first takes in a single training instance and returns the weight and bias gradients for that instance. First, the function performs a forward pass through the network, collecting the <em>z</em> and <em>a</em> values along the way. Then, the δ, <em>w</em>, and <em>b</em> are calculated for the last layer in the network (this layer is calculated differently than the rest of the layers due to the cost function). Next, the δ, <em>w</em>, and <em>b</em> for each subsequent layer working back towards the input of the neural network are calculated using an iterative dynamic programming approach. Finally, the resulting gradient of <em>w</em> and <em>b</em> is returned.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python">    <span class="k">def</span> <span class="nf">backpropagate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">grad_w</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">]</span>
+        <span class="n">grad_b</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">]</span>
+        <span class="c">#forward pass to calculate the 'z' and 'a' values
+</span>
+        <span class="n">a_vals</span><span class="p">,</span> <span class="n">z_vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">):</span>
+            <span class="n">z_vals</span> <span class="o">+=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">a_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">b</span><span class="p">]</span>
+            <span class="n">a_vals</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">z_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="c">#backward pass propagating errors through the network
+</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">a_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">sig_prime</span><span class="p">(</span><span class="n">z_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">grad_w</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">a_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">grad_b</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span><span class="o">*</span><span class="n">sig_prime</span><span class="p">(</span><span class="n">z_vals</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="p">])</span>
+            <span class="n">grad_w</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">a_vals</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">grad_b</span><span class="p">[</span><span class="o">-</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="k">return</span> <span class="n">grad_w</span><span class="p">,</span> <span class="n">grad_b</span> </code></pre></figure>
+
+<p>As a quick validation, we can test a neural networks ability to fit non-linearly-separable data. Figure 5 below shows the result of fitting a neural network with sizes = (2,3,2) to a data set where all labels within a given radius are classified as 1 and all outside the radius are classified as 0.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/mlp_data.png" alt="" />
+        <figcaption><b>Figure 4.</b> (left) Raw data created to test the neural network and (right) results of training a neural network with layer sizes (2,3,2) on the left data. The neural network performs decently well only missing a few instances. </figcaption>
+</span>
+</figure>
+
+<h3 id="resources-and-additional-reading">Resources and Additional Reading</h3>
+
+<p>[1] <a href="http://neuralnetworksanddeeplearning.com/">Neural networks and Deep Learning by Michael Nielsen, Dec. 2019</a></p>
+
+<p>[2] <a href="https://www.youtube.com/watch?v=aircAruvnKk&amp;t=832s">3Blue1Brown youtube series on neural networks</a></p>
+
+<p>[3] <a href="https://github.com/joseywallace?tab=repositories">Code repository for this blog post</a></p>

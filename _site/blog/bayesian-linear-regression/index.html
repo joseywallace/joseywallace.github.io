@@ -1,0 +1,415 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+  Jekyll integration by somiibo.com
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+--><html>
+	<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+<title>Bayesian multivariable linear regression in PyMC3</title>
+<meta name="description" content="">
+
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icon/favicon-16x16.png">
+<link rel="manifest" href="/assets/icon/manifest.json">
+<link rel="mask-icon" href="/assets/icon/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="/assets/icon/favicon.ico">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/v4-shims.css">
+<meta name="msapplication-config" content="/assets/icon/browserconfig.xml">
+<meta name="theme-color" content="#ffffff">
+
+<!-- CSS -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<noscript><link rel="stylesheet" href="/assets/css/noscript.css"></noscript>
+
+	</head>
+	<body class="is-loading">
+
+		<!-- Wrapper -->
+			<div id="wrapper" class="fade-in">
+
+				<!-- Header -->
+        <header id="header">
+          <a href="/" class="logo">Joseph Wallace</a>
+        </header>
+
+				<!-- Nav -->
+					<nav id="nav">
+
+            <ul class="links">
+  <li class=""><a href="/">Home</a></li>
+  <li class=" active "><a href="/blog/">Blog</a></li>
+  <li class=""><a href="/cv/">Curriculum Vitae</a></li>
+</ul>
+
+
+						<ul class="icons">
+              <li><a href="https://linkedin.com/in/joseph-b-wallace/" class="icon fa-linkedin" rel="nofollow"><span class="label">LinkedIn</span></a></li>
+              <li><a href="https://researchgate.net/profile/Joseph_Wallace5" class="fab fa-researchgate" rel="nofollow"><span class="label"></span></a></li>
+              <li><a href="https://github.com/joseywallace" class="icon fa-github" rel="nofollow"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+				<div id="main">
+          <section class="post">
+    				<header class="major">
+      				<span class="date">02 Aug 2018</span>
+      				<h1>Bayesian multivariable linear regression in PyMC3</h1>
+      				<p>A motivating example for Sklearn users interested in Bayesian analysis</p>
+      			</header>
+      			<div class="image main"><img src="/images/pymc3_logo.png" alt=""></div>
+      			<p></p>
+<p>Bayesian linear regression (BLR) is a powerful tool for statistical analysis. BLR models can provide a probability density of parameter values as opposed to a single best-fit value as in the standard (Frequentist) linear regression. In addition, BLR can be used to fit to parameters within a specified interval or create hierarchical models. However, despite decades of development and open source libraries, BLR has yet to reach its full user base potential. One key obstacle to this is overcoming the barrier to entry for new users. In this blog post I hope to remove some of these obstacles by demonstrating how to:</p>
+
+<ol>
+  <li>Create a model</li>
+  <li>Train a model</li>
+  <li>Create a traceplot and summary statistics</li>
+  <li>Run the model on test data</li>
+</ol>
+
+<h3 id="create-the-data">Create the data</h3>
+<p>In this first step, the necessary libraries are imported and the data set is created. PyMC3 is the Bayesian analysis library and Theano is the back-end of PyMC3 handling vector/matrix multiplication. Theano is necessary to import in order to create shared variables that can be used to switch out the test and train data.</p>
+
+<p>In this example, the data set has only two features and 1000 data points. However, these values can be changed through the <em>num_features</em> and <em>data_points</em> attributes. The variables <em>beta_set</em> and <em>alpha_set</em> are the slopes and intercept, respectively, that we will try to guess later.</p>
+
+<p>The variables <em>X</em> and <em>y</em> are created using the slope and intercept values and normally distributed random noise is added to <em>Y</em>. Finally, <em>X</em> and <em>y</em> are split into training and testing set via Sci-kit learn’s <em>train_test_split</em> function.</p>
+
+<p><strong>In [1]:</strong></p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># create the data set
+</span>
+<span class="kn">import</span> <span class="nn">pymc3</span> <span class="kn">as</span> <span class="nn">pm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">theano</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">r2_score</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">'seaborn-darkgrid'</span><span class="p">)</span>
+
+<span class="n">num_features</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">data_points</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">beta_set</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">num_features</span><span class="p">)</span>
+<span class="n">alpha_set</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">data_points</span><span class="p">,</span> <span class="n">num_features</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">alpha_set</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">beta_set</span><span class="o">*</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">data_points</span><span class="p">))</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.33</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span></code></pre></figure>
+
+<h3 id="plot-the-data-set">Plot the data set</h3>
+<p>Next, let’s visualize the data we are fitting. The feature <em>X1</em> shows a postive correlation, whereas <em>X2</em> shows a negative correlation.</p>
+
+<p><strong>In [4]:</strong></p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s">'r'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'X1'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_train</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s">'b'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s">'X2'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'X'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'Y'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></figure>
+
+<figure>
+<span class="image fit">
+	<img src="/images/output_3_0.png" alt="">
+        <figcaption><b>Figure 1.</b> Plot of the simulated data <i>y</i> as a function of the features <i>X1</i> and <i>X2</i>.</figcaption>
+</span>
+</figure>
+<h3 id="create-the-pymc3-model">Create the PyMC3 model</h3>
+<p>Next, we create the PyMC3 model. In PyMC3 all model parameters are attached to a PyMC3 <em>Model</em> object, instantiated with <em>pm.Model</em>. Next, we declare the Theano shared variables, one for the input and one for the output. Model parameters are contained inside the <em>with</em> section. <em>Alpha</em> is the prior distribution for the intercept. <em>Beta</em> is the prior distribution for the slopes, with dimension described by the number of features. <em>S</em> is the prior distribution describing the noise around the data. <em>Data_est</em> is the expected form or model of the data. Finally, <em>y</em> is likelihood.</p>
+
+<p><strong>In [4]:</strong></p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">lin_reg_model</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Model</span><span class="p">()</span>  <span class="c">#instantiate the pymc3 model object
+</span>
+
+<span class="c">#Create a shared theano variable. This allows the model to be created using the X_train/y_train data 
+</span>
+<span class="c"># and then test with the X_test/y_test data
+</span>
+<span class="n">model_input</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+<span class="n">model_output</span> <span class="o">=</span> <span class="n">theano</span><span class="o">.</span><span class="n">shared</span><span class="p">(</span><span class="n">y_train</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">lin_reg_model</span><span class="p">:</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s">'alpha'</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="c"># create random variable alpha of shape 1
+</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s">'betas'</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">num_features</span><span class="p">))</span> <span class="c"># create random variable beta of shape 1,num_features
+</span>
+    
+    <span class="n">s</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">HalfNormal</span><span class="p">(</span><span class="s">'s'</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c"># create distribution to describe noise in the data
+</span>
+    
+    <span class="n">data_est</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">+</span> <span class="n">theano</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">model_input</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>  <span class="c"># Expected value of outcome
+</span>
+    
+    <span class="n">y</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s">'y'</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">data_est</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">y_train</span><span class="p">)</span>  <span class="c"># Likelihood (sampling distribution) of observations</span></code></pre></figure>
+
+<p>It is often difficult to visualize the model from the several lines of code above. When first building a model, it is helpful to draw out your design as shown below.</p>
+<figure> 
+<span class="image fit">
+        <img src="/images/Slide1_edit.png" alt="" style="width:400px;height:400px;">
+        <figcaption><b>Figure 2.</b> Hierarchical diagram of the multiple linear regression model.</figcaption>
+</span>
+</figure>
+
+<p>Figure 2, shows the hierarchical diagram of the model. At the base of the model is the datum, <i>y<sub>i</sub></i>, which is normally distributed random value with a mean value, μ<sub>i</sub> and width σ. The width is described by a half-normal distribution. The mean value is described by the equation shown above, where the intercept (α) and slope (β) are both given broad normal priors that are vague compared to the scale of the data. Each feature has it’s own slope coefficients described by the normal prior.</p>
+<h3 id="train-the-model">Train the model</h3>
+<p>Next, we train the model. In this example we use the NUTS (No U-Turn sampler) method as the stepper. The <em>pm.sample</em> command draws samples from the posterior.</p>
+
+<p><strong>In [5]:</strong></p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">with</span> <span class="n">lin_reg_model</span><span class="p">:</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">NUTS</span><span class="p">()</span>
+    <span class="n">nuts_trace</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">njobs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></code></pre></figure>
+
+<div class="highlighter-rouge">
+<pre class="highlight"><code>Sequential sampling (2 chains in 1 job)
+NUTS: [s, betas, alpha]
+100%|█████████████████████████████████████████████████████████████████████████████| 2500/2500 [00:05&lt;00:00, 432.98it/s]
+100%|█████████████████████████████████████████████████████████████████████████████| 2500/2500 [00:02&lt;00:00, 836.41it/s]
+</code></pre>
+</div>
+
+<h3 id="traceplot-and-summary-statistics">traceplot and summary statistics</h3>
+<p>Once the model has completed training, we can plot the traceplot and look at summary statistics. The left column shows the posterior distributions for <em>Alpha</em>, <em>Beta</em>, and the standard deviation of the noise in the model. From these graphs, we get not only the mean value of the estimate, but the entire probability distribution. This is in effect what makes probablistic programming and Bayesian analysis unique and in many cases superior to frequentist statistics. The right column shows the sampling values for each parameter at each step.</p>
+
+<p><strong>In [6]:</strong></p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">pm</span><span class="o">.</span><span class="n">traceplot</span><span class="p">(</span><span class="n">nuts_trace</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></code></pre></figure>
+
+<figure> 
+<span class="image fit">
+        <img src="/images/output_9_0.png" alt="">
+        <figcaption><b>Figure 3.</b> Traceplot showing the posterior distributions (left pane) and sampling history (right pane) for <i>Alpha</i>, <i>Beta</i> for both features, and <i>sigma</i>.</figcaption>
+</span>
+</figure>
+
+<p><strong>In [7]:</strong></p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">pm</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">nuts_trace</span><span class="p">[</span><span class="mi">1000</span><span class="p">:])</span></code></pre></figure>
+
+<p>The summary statistics can be viewed via the <em>pm.summary</em> command. The default values are the mean, standard deviation, MC error = sd/sqrt(iterations), high probability density (HPD) values, n_eff = effective sample size, and Rhat = scale reduction factor. Rhat and n_eff are both used to determine if the chains mixed well and if the solution has converged. Rhat measures the ratio of the average variance in each chain compared to the variance of the pooled draws across chains. As the model converges Rhat approaches 1.</p>
+
+<div class="table-wrapper">
+	<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean</th>
+      <th>sd</th>
+      <th>mc_error</th>
+      <th>hpd_2.5</th>
+      <th>hpd_97.5</th>
+      <th>n_eff</th>
+      <th>Rhat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>alpha__0</th>
+      <td>0.480106</td>
+      <td>0.037595</td>
+      <td>0.000774</td>
+      <td>0.405709</td>
+      <td>0.550487</td>
+      <td>2975.210769</td>
+      <td>1.001104</td>
+    </tr>
+    <tr>
+      <th>betas__0_0</th>
+      <td>1.557257</td>
+      <td>0.036890</td>
+      <td>0.000658</td>
+      <td>1.487401</td>
+      <td>1.628156</td>
+      <td>3147.314093</td>
+      <td>0.999515</td>
+    </tr>
+    <tr>
+      <th>betas__0_1</th>
+      <td>-1.562830</td>
+      <td>0.038143</td>
+      <td>0.000744</td>
+      <td>-1.634971</td>
+      <td>-1.484338</td>
+      <td>2849.492200</td>
+      <td>0.999755</td>
+    </tr>
+    <tr>
+      <th>s</th>
+      <td>0.986880</td>
+      <td>0.027428</td>
+      <td>0.000468</td>
+      <td>0.930528</td>
+      <td>1.038020</td>
+      <td>3049.781251</td>
+      <td>0.999667</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="test-the-trained-model-on-the-test-data">Test the trained model on the test data</h3>
+<p>Next, we want to test the model on the training data. This is where the shared variables we created are useful. We can now switch out the training data with the model data via the <em>set_value</em> command from Theano. Once the Theano values are set, we pull sample from the posterior for each test data point. This is accomplished through a posterior predictive check (PPC), which draws 1000 samples from the trace for each data point.</p>
+
+<p><strong>In [8]:</strong></p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># set the shared values to the test data
+</span>
+<span class="n">model_input</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">model_output</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+
+<span class="c">#create a posterior predictive check (ppc) to sample the space of test x values
+</span>
+<span class="n">ppc</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">sample_ppc</span><span class="p">(</span>
+        <span class="n">nuts_trace</span><span class="p">[</span><span class="mi">1000</span><span class="p">:],</span> <span class="c"># specify the trace and exclude the first 1000 samples 
+</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">lin_reg_model</span><span class="p">,</span> <span class="c"># specify the trained model
+</span>
+        <span class="n">samples</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span> <span class="c">#for each point in X_test, create 1000 samples</span></code></pre></figure>
+
+<div class="highlighter-rouge">
+<pre class="highlight"><code>100%|████████████████████████████████████████████████████████████████████████████| 1000/1000 [00:00&lt;00:00, 1683.52it/s]
+</code></pre>
+</div>
+
+<h3 id="plot-the-y_test-vs-y_predict-and-calculate-r2">Plot the y_test vs y_predict and calculate r**2</h3>
+<p>The ppc can be visualized by plotting the predicted y values from the model as a function of the actual y values with error bars generated from the standard deviation of the 1000 samples drawn for each point. As a second check, we can also use <em>sci-kit learn’s r2_score</em> function to determine the error in the estimates.</p>
+
+<p><strong>In [9]:</strong></p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">pred</span> <span class="o">=</span> <span class="n">ppc</span><span class="p">[</span><span class="s">'y'</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c"># take the mean value of the 1000 samples at each X_test value 
+</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">r2_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span><span class="o">*</span><span class="n">pred</span><span class="p">)</span></code></pre></figure>
+
+<p><span class="image fit"><img src="/images/output_14_0.png" alt=""></span></p>
+
+<div class="highlighter-rouge">
+<pre class="highlight"><code>0.835496545799272
+</code></pre>
+</div>
+
+<h3 id="resources-and-additional-reading">Resources and Additional Reading</h3>
+
+<p>Below is a list of resources</p>
+
+      		</section>
+
+          <div class="comments-wrapper">
+          <div id="disqus_thread"></div>
+          <script>
+              /**
+               *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+               *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+               */
+
+              var disqus_config = function () {
+                  this.page.url = '/blog/bayesian-linear-regression/';  /*Replace PAGE_URL with your page's canonical URL variable*/
+                  this.page.identifier = '/blog/bayesian-linear-regression/'; /*Replace PAGE_IDENTIFIER with your page's unique identifier variable*/
+              };
+
+              (function() {  /* dont endit below this line */
+                  var d = document, s = d.createElement('script');
+
+                  s.src = 'https://joseywallace.github.io.disqus.com/embed.js';
+
+                  s.setAttribute('data-timestamp', +new Date());
+                  (d.head || d.body).appendChild(s);
+              })();
+          </script>
+          <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+</noscript>
+        </div>
+<!-- /.comments-wrapper -->
+
+
+					<!-- Footer -->
+						<footer>
+              <ul class="actions">
+                <li><a href="/blog/" class="button">The Blog</a></li>
+              </ul>
+						</footer>
+					</div>
+
+				<!-- Footer -->
+        <footer id="footer">
+  <section>
+    <form method="POST" action="https://formspree.io/Josey.Wallace@gmail.com">
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name">
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="text" name="email" id="email">
+      </div>
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea name="message" id="message" rows="3"></textarea>
+      </div>
+      <ul class="actions">
+        <li><input type="submit" value="Send Message"></li>
+      </ul>
+    </form>
+  </section>
+  <section class="split contact">
+    <section class="alt">
+      <h3>Location</h3>
+      <p>Silicon Valley, CA</p>
+    </section>
+    <section>
+      <h3>Social</h3>
+      <ul class="icons alt">
+        
+        <li><a href="https://www.linkedin.com/" class="icon fa-linkedin" rel="nofollow"><span class="label">LinkedIn</span></a></li>
+        <li><a href="https://researchgate.net/profile/Joseph_Wallace5" class="fab fa-researchgate" rel="nofollow"><span class="label"></span></a></li>
+        <li><a href="https://github.com/default" class="icon fa-github" rel="nofollow"><span class="label">GitHub</span></a></li>
+      </ul>
+    </section>
+  </section>
+</footer>
+<!-- Copyright -->
+<div id="copyright">
+  <ul>
+<li>© HTML5 UP</li>
+<li>Design by <a href="https://html5up.net" rel="nofollow">HTML5 UP</a>
+</li>
+<li>Jekyll Integration by <a href="https://soundgrail.com">SoundGrail</a>
+</li>
+</ul>
+</div>
+
+
+			</div>
+
+      <!-- Scripts -->
+  		<!-- DYN -->
+<script src="/assets/js/jquery.min.js"></script>
+<script src="/assets/js/jquery.scrollex.min.js"></script>
+<script src="/assets/js/jquery.scrolly.min.js"></script>
+<script src="/assets/js/skel.min.js"></script>
+<script src="/assets/js/util.js"></script>
+<script src="/assets/js/main.js"></script>
+
+			<script async src="https://www.googletagmanager.com/gtag/js?id=default"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments)};
+  gtag('js', new Date());
+
+  gtag('config', 'default');
+</script>
+
+
+	</body>
+</html>

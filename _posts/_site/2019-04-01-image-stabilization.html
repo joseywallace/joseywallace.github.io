@@ -1,0 +1,207 @@
+<p>This tutorial demonstrates the process of image stabilization in python using the OpenCV library. The code for this demonstration, including several helper functions used to plot and visualize the transformation can be foudn on my github page below. The image stabilizaation pipeline involves three main steps – (1) determining the original path of the camera, (2) smoothing this path, and (3) applying the smoothed path to the image set.</p>
+
+<h2 id="finding-the-cameras-path">Finding the Camera’s Path</h2>
+<p>The camera’s path can be determined by finding the warp matrix from one image to the next in the series. This matrix allows us to transform or map from the one camera coordinate system to another. The first step in determining this matrix, is deciding on a suitable model for the geometric transformation from one frame to the next. The most common choices are either affine or pure translation, however, other methods rely on projective transformation (homography) or even non-linear transformations. In this tutorial, we will assume Euclidean motion and use the following transformation:
+<br /><br /></p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/eq01_image_stab.png" alt="" />
+</span>
+</figure>
+
+<p>Where, (x, y) and (x’, y’) are the pixel coordinates in the original and stabilized system, respectively. The vector (Tx, Ty) represents the camera’s translation and θ is the camera’s rotation, both relative to some initial reference frame. The second equation uses the homogeneous form which brings the translation and rotation terms into a single matrix. This matrix is known as the warp matrix, since it can be used to warp an image from one coordinate frame to another.</p>
+
+<h3 id="determining-the-warp-marp-matrix">Determining the warp marp matrix</h3>
+
+<p>There are several methods for determining the warp matrix. All methods involve looking for some type of correspondence between two images. These correspondences can be either sparse (ie feature matching between images with RANSAC) or dense (Lucas-Kanade optical flow). Both of these methods can be computationaly intensive for longer videos. A more recent method that runs faster (in some cases) and is more stable (in some cases) is the so-called “Parametric Image Alignment using Enhanced Correlation Coefficient Maximization”[1]. This method uses an “enhanced” correlation coefficient for the similarity metric that is robust against geometric and photometric distortions. In addition, the iterative approach the authors use linearizes the problem making it much faster than directly solving the non-linear objective function. This method can be employed in OpenCV via the <em>findTransfromECC</em> function as shown below.</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_warp</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">motion</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">MOTION_EUCLIDEAN</span><span class="p">):</span>
+    <span class="n">imga</span> <span class="o">=</span> <span class="n">img1</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">imgb</span> <span class="o">=</span> <span class="n">img2</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imga</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">imga</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">imga</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgb</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">imgb</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">imgb</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">motion</span> <span class="o">==</span> <span class="n">cv2</span><span class="o">.</span><span class="n">MOTION_HOMOGRAPHY</span><span class="p">:</span>
+        <span class="n">warpMatrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">warpMatrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">warp_matrix</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">findTransformECC</span><span class="p">(</span><span class="n">templateImage</span><span class="o">=</span><span class="n">imga</span><span class="p">,</span><span class="n">inputImage</span><span class="o">=</span><span class="n">imgb</span><span class="p">,</span>
+                                       <span class="n">warpMatrix</span><span class="o">=</span><span class="n">warpMatrix</span><span class="p">,</span> <span class="n">motionType</span><span class="o">=</span><span class="n">motion</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">warp_matrix</span> 
+
+<span class="k">def</span> <span class="nf">create_warp_stack</span><span class="p">(</span><span class="n">imgs</span><span class="p">):</span>
+    <span class="n">warp_stack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">imgs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">warp_stack</span> <span class="o">+=</span> <span class="p">[</span><span class="n">get_warp</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">imgs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">warp_stack</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>The <em>get_warp</em> function takes as input the two images and the motion model (Euclidean in this example) to be used and returns the warp matrix. The <em>create_warp_stack</em> simply calls the get_warp on a list of images and returns the 3D numpy array of warp matrices. It is important to note the warp matrices are between neighboring pairs of images. As a result, the homography matrices represent the change in motion between the frames. We could think of these delta values as the derivative of position with respect to the frame number (or a velocity of sorts). The trajectory can be determined from integrating over the velocity via a product of warp matrices:</p>
+
+<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\Large&space;
+H_{1,n}=\prod_{i=1}^{n}H_{i,i+1}" title="eq_1" /></p>
+
+<p>Where H is the warp matrix. The function below yields the nth integrated warp matrix on the nth call.</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">homography_gen</span><span class="p">(</span><span class="n">warp_stack</span><span class="p">):</span>
+    <span class="n">H_tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">wsp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dstack</span><span class="p">([</span><span class="n">warp_stack</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,:],</span> <span class="n">warp_stack</span><span class="p">[:,</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="n">warp_stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">warp_stack</span><span class="p">)):</span>
+        <span class="n">H_tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">wsp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">H_tot</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">H_tot</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>These three function represent the first step in the image stabilization pipline. Now, let’s try applying these functions to some video. The video below was taken while moving the camera in both panning motions and shaky random motions.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/2019-04-01-cars_raw.gif" alt="" />
+        <figcaption><b>Figure 1.</b> Raw shaky footage including panning and rotating.</figcaption>
+</span>
+</figure>
+
+<h3 id="finding-camera-the-velocity-and-trajectory">Finding camera the velocity and trajectory</h3>
+
+<p>We can run the <em>create_warp_stack</em> method to find the camera’s motion through the video and plot the velocity and trajectory as shown below. The trajectory is found by doing a cumulative summation over the warp stack.</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">ws</span> <span class="o">=</span> <span class="n">create_warp_stack</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>
+<span class="n">i</span><span class="p">,</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">2</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ws</span><span class="p">)),</span> <span class="n">ws</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s">'X Velocity'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ws</span><span class="p">)),</span> <span class="n">ws</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ws</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">ws</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s">'X Trajectory'</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ws</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">ws</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'Frame'</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<figure>
+<span class="image fit">
+        <img src="/images/2019-04-01-trajectory.png" alt="" />
+        <figcaption><b>Figure 2.</b> Camera velocity and trajectory.</figcaption>
+</span>
+</figure>
+
+<h3 id="visualizing-the-motion-by-stablizing-the-camera">Visualizing the motion by stablizing the camera</h3>
+
+<p>We can visualize this motion by applying the warp stack to each image in the sequence via OpenCV’s <em>warpPerspective</em> function. This function applies the warp matrix to each of the source image pixel’s x,y location to determine it’s coordinates in the warped image. Care must be taken to ensure the images are not pushed outside the display bounds. The function give below solves this problem adding a translation offset to the warp matrix and another offset to the openCV <em>warpPerspective</em> function. These offsets are determined from finding the maximum and minimum coordinates for the image corners. The helper function used to find these values is given in the appendix.</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">apply_warping_fullview</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">warp_stack</span><span class="p">,</span> <span class="n">PATH</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">get_border_pads</span><span class="p">(</span><span class="n">img_shape</span><span class="o">=</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">warp_stack</span><span class="o">=</span><span class="n">warp_stack</span><span class="p">)</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">homography_gen</span><span class="p">(</span><span class="n">warp_stack</span><span class="p">)</span>
+    <span class="n">imgs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="n">H_tot</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">H</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">left</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">top</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">img_warp</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">warpPerspective</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">H_tot</span><span class="p">,(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">left</span><span class="o">+</span><span class="n">right</span><span class="p">,</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">top</span><span class="o">+</span><span class="n">bottom</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">PATH</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">PATH</span> <span class="o">+</span> <span class="s">""</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))))</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span><span class="s">'.png'</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">img_warp</span><span class="p">)</span>
+        <span class="n">imgs</span> <span class="o">+=</span> <span class="p">[</span><span class="n">img_warp</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">imgs</span>
+</code></pre>
+</div>
+
+<p>The resulting video as well as the x trajectory are shown in the figure below.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/2019-04-01-cars_zeroed.gif" alt="" />
+        <figcaption><b>Figure 3.</b> (top) Stabilized video with all camera motion removed and (bottom) camera trajectory with the red dot indicating current position.</figcaption>
+</span>
+</figure>
+
+<p>This video in Fig. 3 shows a fully stabilized warp of the original shaky video. You might notice there are some artifacts after the warp. When the camera pans very quickly you get an effect known as the “rolling shutter effect”. The effect occurs due to the  fact that the image sensor continues to gather light during the acquistion process. The camera pixels are read sequentially from top to bottom or right to left. Thus, one side of the camera sees a slightly different image than the other side. This creates the “wobble” or “jello-like effect” seen above.</p>
+
+<h2 id="determining-the-smoothed-camera-trajectory">Determining the smoothed camera trajectory</h2>
+
+<p>Although the video in Fig.3 was interesting to make, we ideally don’t want to see any black regions around opur final product. Cropping is one obvious solution. However, with this much motion, there is no reasonably sized window that could eliminate all black regions. There are two options – (1) motion inpainting or (2) smoothing the trajectory. The first option involves using information from previous/future frames to guess what should be outside the range of the current frame and “inpainting” those pixels. The second approach involves trying to estimate the intended motion the camera-person wanted and removing the high frequency surrounding that signal. The second approach involves separating the camera’s intended path from the high frequency instabilities. This post focuses on the second approach using a simple gaussian filter to remove the high frequency noise.</p>
+
+<p>In order to compute the smoothed trajectory, we need the original trajectory, averaging window size, and sigma for the smoothing gaussian. The <em>gauss_convolve</em> function below takes these as input and returns the smoothed trajectory as shown below. Since we must smooth all components in the warp matrix stack, it is easiest to pass the sigma values for each element of the warp matrix as a matrix itself. The second function, <em>moving_average</em>, shown below takes the warp stack and sigma matrix as input and calls the <em>gauss_convolve</em> function on each element in the warp matrix. After finding the new trajectory, a derivative kernel is applied ([0,1,-1]) in order to get the velocity which is what the warp matrix is represented by.</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="nf">gauss_convolve</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">convolve</span><span class="p">(</span><span class="n">trajectory</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">'reflect'</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">moving_average</span><span class="p">(</span><span class="n">warp_stack</span><span class="p">,</span> <span class="n">sigma_mat</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">warp_stack</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">original_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">warp_stack</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">smoothed_trajectory</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">original_trajectory</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="n">kernel</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="n">sigma_mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="nb">sum</span><span class="p">(</span><span class="n">kernel</span><span class="p">)</span>
+            <span class="n">smoothed_trajectory</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">original_trajectory</span><span class="p">[:,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">],</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">'reflect'</span><span class="p">)</span>
+    <span class="n">smoothed_warp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="k">lambda</span> <span class="n">m</span><span class="p">:</span> 
+                     <span class="n">convolve</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s">'reflect'</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">arr</span><span class="o">=</span><span class="n">smoothed_trajectory</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">smoothed_warp</span><span class="p">,</span> <span class="n">smoothed_trajectory</span><span class="p">,</span> <span class="n">original_trajectory</span>
+</code></pre>
+</div>
+
+<p>Applying <em>moving_average</em> to the warp matrix stack with a sigma matrix given by:</p>
+
+<p style="text-align:center;"><img src="https://latex.codecogs.com/svg.latex?\Large&space;
+\sigma =\begin{bmatrix} 1000 &amp; 15 &amp; 10 \\ 15 &amp; 1000 &amp; 10 \end{bmatrix}" title="eq_1" /></p>
+
+<p>gives a somewhat weak smoothing in x and y and stronger smoothing for rotation. The resulting trajectory for X and theta is shown below.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/2019-04-01_smoothed.png" alt="" />
+        <figcaption><b>Figure 4.</b> (top) X trajectory and (bottom) Theta as a function of frame number for the original and smoothed camera paths.</figcaption>
+</span>
+</figure>
+
+<p>This smoothing can be applied as to the images as follows:</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">warp_stack</span> <span class="o">=</span> <span class="n">create_warp_stack</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span>
+<span class="n">smoothed_warp</span><span class="p">,</span> <span class="n">smoothed_trajectory</span><span class="p">,</span> <span class="n">original_trajectory</span> <span class="o">=</span> <span class="n">moving_average</span><span class="p">(</span><span class="n">warp_stack</span><span class="p">,</span> 
+    <span class="n">sigma_mat</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1000</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">],[</span><span class="mi">15</span><span class="p">,</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]))</span>
+<span class="n">new_imgs</span> <span class="o">=</span> <span class="n">apply_warping_fullview</span><span class="p">(</span><span class="n">images</span><span class="o">=</span><span class="n">imgs</span><span class="p">,</span> <span class="n">warp_stack</span><span class="o">=</span><span class="n">warp_stack</span><span class="o">-</span><span class="n">smoothed_warp</span><span class="p">,</span> <span class="n">PATH</span><span class="o">=</span><span class="s">'./out/'</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>Note that the warp matrix stack fed to the <em>apply_warping_fullview</em> is not simply the <em>smoothed_warp</em>, but instead the difference of the original warp stack and the smoothed warp stack. This is because the <em>smoothed_warp</em> represents the part of the motion we want to keep, whereas the difference is only the high frequency components. The resulting video after applying the new warp stack is shown below:</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/2019-04-01_cars_smoothed.gif" alt="" />
+        <figcaption><b>Figure 5.</b> (top) smoothed camera motion (bottom) X trajectory as a function of frame number for the smoothed camera path and the high frequency noise which is removed via apply_warping_fullview.</figcaption>
+</span>
+</figure>
+
+<p>Applying the new warp allows the camera to pan left and right without moving significantly outside the original image area. The main contributor to the somehwat large black boundaries are now the rotation terms. Decreasing the rotation sigma values could further reduce the black boundaries (ie increase the final cropped image size).</p>
+
+<p>A good image stabilization algorithm should be fairly stable against salient points in the image (ie someone walking into and out of the camera’s frame). The two video’s below test the image stabilization algorithm against salient points. In both these videos I’m running while filming. The first video is taken parallel with the direction I’m running whereas the second example the camera is ~30 degrees to my direction.</p>
+
+<figure>
+<span class="image fit">
+        <img src="/images/2019-04-01-run2.gif" alt="" />
+        <figcaption><b>Figure 6.</b> (top) smoothed camera motion (bottom) Y trajectory as a function of frame number for the smoothed camera path and the high frequency noise which is removed via apply_warping_fullview.</figcaption>
+</span>
+</figure>
+
+<figure>
+<span class="image fit">
+        <img src="/images/2019-04-01-run1.gif" alt="" />
+        <figcaption><b>Figure 7.</b> (top) smoothed camera motion (bottom) Y trajectory as a function of frame number for the smoothed camera path and the high frequency noise which is removed via apply_warping_fullview.</figcaption>
+</span>
+</figure>
+
+<p>In both cases I reused the same sigma matrix as used above in Fig. 5. Both videos appear quite stable against salient image points. From these examples we can see that the gaussian kernel smoothing is quite effective at stabilizing images. However, compared to the state-of-the-art image stabilization work done by google[2-3], these stabilization techniques are still quite primitive. Google’s algorithm actually uses cinamatography principles to determine the ideal path. They assume that the desired path should be composed of constant, linear, and parabolic segments only. This methodology eliminates unwanted camera drift and that a simple gaussian convolution would not remove. More on this technique to come!</p>
+
+<h2 id="references">References</h2>
+
+<p>[1] <a href="https://ieeexplore.ieee.org/document/4515873">G. D. Evangelidis and E. Z. Psarakis, “Parametric Image Alignment Using Enhanced Correlation Coefficient Maximization,” in IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 30, no. 10, pp. 1858-1865, Oct. 2008.</a></p>
+
+<p>[2] <a href="https://www.cc.gatech.edu/cpl/projects/videostabilization/">M. Grundmann, V. Kwatra and I. Essa, “Auto-directed video stabilization with robust L1 optimal camera paths,” CVPR 2011, Colorado Springs, CO, USA, 2011, pp. 225-232.</a></p>
+
+<p>[3] <a href="https://ai.googleblog.com/2011/06/auto-directed-video-stabilization-with.html"> Google AI Blog: Auto-Directed Video Stabilization with Robust L1 Optimal Camera Paths”</a></p>
+
+<p>[4] <a href="https://www.learnopencv.com/video-stabilization-using-point-feature-matching-in-opencv/">Learn OpenCV: Video Stabilization Using Point Feature Matching in OpenCV”</a></p>
+
+<p><em><strong>Note: This code was originally written in partial fulfillment of Georgia Tech’s CS6475 (Computational Photography)</strong></em>.</p>
