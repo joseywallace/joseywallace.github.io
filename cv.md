@@ -11,7 +11,7 @@ sitemap:
 ## PROFESSIONAL EXPERIENCE
 <div class="box">
   <p>
-2017-20    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Senior Process Engineer, Intel <br />
+2017-pr    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Senior Process Engineer, Intel <br />
 2014-17    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lawrence Scholar Fellow, Lawrence Livermore National Laboratory <br />
 2011-14    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Graduate Research Assistant under Dr. Lin Shao, Texas A&M University <br />
 2008-11    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Undergraduate Researcher in Nuclear Engineering, Texas A&M University <br />
@@ -21,7 +21,7 @@ sitemap:
 ## EDUCATION
 <div class="box">
   <p>
-2019-21         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M.S., Computer Science, Georgia Institute of Technology, Atlanta, GA <br />
+2019-pr         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;M.S., Computer Science, Georgia Institute of Technology, Atlanta, GA <br />
 2011-17		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ph.D., Nuclear Engineering, Texas A&M University, College Station, TX <br />
 2006-11		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Nuclear Engineering, Texas A&M University, College Station, TX <br />
 2006-11		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B.S., Physics, Texas A&M University, College Station, TX <br />
@@ -62,7 +62,7 @@ sitemap:
 			<li><b>J.B. Wallace</b>, D. Chen and, L. Shao. "Carbon Displacement-Induced Single Carbon Atomic Chain Formation and its Effects on Sliding of SiC Fibers in SiC/graphene/SiC Composite", Mater. Res. Lett. 4, 55 (2015).</li>
 			<li><b>J.B. Wallace</b> and L. Shao. "Defect-induced carbon nanoscroll formation", Carbon 91, 96 (2015).</li>
 			<li><b>J.B. Wallace</b>, D. Chen, J. Wang and, L. Shao. "Molecular dynamics simulation of damage cascade creation in SiC composites containing SiC/graphite interface", Nucl. Instrum. Methods. Phys. Res. B 307, 81 (2013).</li>
-
+                        <b>See <a href="https://www.researchgate.net/profile/Joseph_Wallace5">ResearchGate</a>For a complete update to date list </b>
 		</ol>
   </p>
 </div>
